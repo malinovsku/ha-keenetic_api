@@ -1,0 +1,121 @@
+{
+    "config": {
+      "abort": {
+        "already_configured": "Устройство уже настроено!"
+      },
+      "step": {
+        "user": {
+          "data": {
+            "host": "Хост",
+            "port": "Порт",
+            "username": "Логин",
+            "password": "Пароль",
+            "ssl": "SSL certificate",
+            "scan_interval": "Интервал скарирования (секунд)."
+          },
+          "description": "Введите свои учетные данные Keenetic."
+        }
+      }
+    },
+    "options": {
+      "abort": {
+        "not_supported_settings": "Дополнительные настройки доступны \n только для типа router! \n У вас {hw_type}"
+      },
+      "step": {
+        "configure_router": {
+          "description": "Дополнительные настройки.",
+          "data": {
+            "scan_interval": "Интервал скарирования (секунд).",
+            "create_image_qr": "Создать объекты Image QG WiFi.",
+            "create_entity_all_cliens_button_policy": "Создать объекты Select политик для всех устройств.",
+            "cliens_select_policy": "Создать объекты Select политик по выбранным устройствам.",
+            "create_device_tracker": "Создать объекты device_tracker по всем устройствам.",
+            "create_entity_port_forwarding": "Создать объекты Switch по всем port forwarding."
+          }
+        },
+        "configure_other": {
+          "description": "Дополнительные настройки.",
+          "data": {
+            "scan_interval": "Интервал скарирования (секунд)."
+          }
+        }
+      }
+    },
+    "services": {
+      "request_api": {
+        "name": "Execute request.",
+        "fields": {
+          "entry_id": {
+            "name": "Integration:"
+          },
+          "method": {
+            "name": "Method:"
+          },
+          "endpoint": {
+            "name": "Point API:"
+          },
+          "data_json": {
+            "name": "Data:"
+          }
+        }
+      },
+      "backup_router": {
+        "name": "Create backup.",
+        "fields": {
+          "entry_id": {
+            "name": "Integration:"
+          },
+          "folder": {
+            "name": "The folder to save:"
+          },
+          "type": {
+            "name": "Type backup:"
+          }
+        }
+      }
+    },
+    "entity": {
+      "select": {
+        "client_policy": {
+          "name": "Сlient Policy",
+          "state": {
+            "default": "Default",
+            "not_internet": "Not internet"
+          }
+        }
+      },
+      "sensor": {
+        "cpuload": {
+          "name": "CPU load"
+        },
+        "memory": {
+          "name": "Memory load"
+        },
+        "uptime": {
+          "name": "Uptime"
+        },
+        "temperature_2_4g": {
+          "name": "Temperature 2.4g chip"
+        },
+        "temperature_5g": {
+          "name": "Temperature 5g chip"
+        },
+        "clients_wifi": {
+          "name": "Clients WiFi"
+        }
+      },
+      "image": {
+        "qrwifi": {
+          "name": "{name}"
+        }
+      },
+      "switch": {
+        "interface": {
+          "name": "{name_interface}"
+        },
+        "port_forwarding": {
+          "name": "PortFrw {pfrw_name}"
+        }
+      }
+    }
+}

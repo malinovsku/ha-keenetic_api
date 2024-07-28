@@ -1,0 +1,45 @@
+request_api:
+  fields:
+    entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: keenetic_api
+    method:
+      required: true
+      selector:
+        select:
+          options:
+            - GET
+            - POST
+    endpoint:
+      required: true
+      example: "/rci/show/version"
+      selector:
+        template:
+    data_json:
+      required: false
+      selector:
+        template:
+backup_router:
+  fields:
+    entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: keenetic_api
+    folder:
+      required: true
+      selector:
+        template:
+    type:
+      required: true
+      example:
+        - firmware
+        - config
+      selector:
+        select:
+          multiple: true
+          options:
+            - firmware
+            - config

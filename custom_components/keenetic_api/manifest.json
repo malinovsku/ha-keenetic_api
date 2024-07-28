@@ -1,0 +1,13 @@
+{
+    "domain": "keenetic_api",
+    "name": "Keenetic API",
+    "codeowners": [
+        "@malinovsku"
+    ],
+    "config_flow": true,
+    "documentation": "https://github.com/malinovsku/keenetic_api",
+    "iot_class": "local_polling",
+    "issue_tracker": "https://github.com/malinovsku/keenetic_api/issues",
+    "requirements": ["pyqrcode==1.2.1", "pypng==0.20220715.0"],
+    "version": "0.1"
+}

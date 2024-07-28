@@ -1,0 +1,20 @@
+{
+    "entity": {
+        "switch": {
+            "interface": {
+                "default": "mdi:mdi:server-network-off",
+                "state": {
+                    "off": "mdi:server-network-off",
+                    "on": "mdi:server-network"
+                }
+            },
+            "port_forwarding": {
+                "default": "mdi:arrange-bring-forward"
+            }
+        }
+    },
+    "services": {
+        "request_api": "mdi:api",
+        "backup_router": "mdi:file-document-plus"
+    }
+}

@@ -1,0 +1,121 @@
+{
+    "config": {
+      "abort": {
+        "already_configured": "Устройство уже настроено!"
+      },
+      "step": {
+        "user": {
+          "data": {
+            "host": "Хост",
+            "port": "Порт",
+            "username": "Логин",
+            "password": "Пароль",
+            "ssl": "SSL certificate",
+            "scan_interval": "Интервал скарирования (секунд)."
+          },
+          "description": "Введите свои учетные данные Keenetic."
+        }
+      }
+    },
+    "options": {
+      "abort": {
+        "not_supported_settings": "Дополнительные настройки доступны \n только для типа router! \n У вас {hw_type}"
+      },
+      "step": {
+        "configure_router": {
+          "description": "Дополнительные настройки.",
+          "data": {
+            "scan_interval": "Интервал скарирования (секунд).",
+            "create_image_qr": "Создать объекты Image QG WiFi.",
+            "create_entity_all_cliens_button_policy": "Создать объекты Select политик для всех устройств.",
+            "cliens_select_policy": "Создать объекты Select политик по выбранным:",
+            "create_device_tracker": "Создать объекты device_tracker по всем устройствам.",
+            "create_entity_port_forwarding": "Создать объекты Switch по всем port forwarding."
+          }
+        },
+        "configure_other": {
+          "description": "Дополнительные настройки.",
+          "data": {
+            "scan_interval": "Интервал скарирования (секунд)."
+          }
+        }
+      }
+    },
+    "services": {
+      "request_api": {
+        "name": "Выполнить запрос.",
+        "fields": {
+          "entry_id": {
+            "name": "Интеграция:"
+          },
+          "method": {
+            "name": "Метод:"
+          },
+          "endpoint": {
+            "name": "Точка API:"
+          },
+          "data_json": {
+            "name": "Данные:"
+          }
+        }
+      },
+      "backup_router": {
+        "name": "Создать backup.",
+        "fields": {
+          "entry_id": {
+            "name": "Интеграция:"
+          },
+          "folder": {
+            "name": "Папка для сохранения:"
+          },
+          "type": {
+            "name": "Тип backup:"
+          }
+        }
+      }
+    },
+    "entity": {
+      "select": {
+        "client_policy": {
+          "name": "Политика доступа",
+          "state": {
+            "default": "По умолчанию",
+            "not_internet": "Без интернета"
+          }
+        }
+      },
+      "sensor": {
+        "cpuload": {
+          "name": "CPU load"
+        },
+        "memory": {
+          "name": "Memory load"
+        },
+        "uptime": {
+          "name": "Uptime"
+        },
+        "temperature_2_4g": {
+          "name": "Температура 2.4g чипа"
+        },
+        "temperature_5g": {
+          "name": "Температура 5g чипа"
+        },
+        "clients_wifi": {
+          "name": "Клиентов WiFi"
+        }
+      },
+      "image": {
+        "qrwifi": {
+          "name": "{name}"
+        }
+      },
+      "switch": {
+        "interface": {
+          "name": "{name_interface}"
+        },
+        "port_forwarding": {
+          "name": "PortFrw {pfrw_name}"
+        }
+      }
+    }
+}
