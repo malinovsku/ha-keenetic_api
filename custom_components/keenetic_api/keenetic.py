@@ -105,9 +105,11 @@ class Router:
 
         data_show_version = await self.show_version()
         self._model = data_show_version["model"]
-        self._hw_type = data_show_version["hw_type"]
         self._hw_id = data_show_version["hw_id"]
         self._name_device = data_show_version["device"]
+
+        data_show_system_mode = await self.show_system_mode()
+        self._hw_type = data_show_system_mode["active"]
 
 
     async def async_download_file(self, download_url, folder):
@@ -130,6 +132,9 @@ class Router:
             async with self._session.request(method=method, url=url, json=json, headers=headers) as res:
                 if res.status == 200 and res.content_type == 'application/json':
                     result = await res.json()
+                elif res.status == 200 and res.content_type == 'application/javascript':
+                    result = await res.text()
+                    result = self.data_parser(result)
                 else:
                     result = res
                 _LOGGER.debug(f'{self._mac} status - {endpoint} {res.status}')
@@ -180,8 +185,14 @@ class Router:
     async def show_system(self):
         return await self.api("get", "/rci/show/system")
 
+    async def show_system_mode(self):
+        return await self.api("get", "/rci/show/system/mode")
+
     async def show_version(self):
         return await self.api("get", "/rci/show/version")
+
+    async def ndm_components(self):
+        return await self.api("get", "/ndmComponents.js")
 
     async def show_ip_hotspot(self):
         return await self.api("get", "/rci/show/ip/hotspot/host")
@@ -228,6 +239,21 @@ class Router:
             {"system": {"configuration": {"save": {}}}}
         ]
         return await self.api("post", f"/rci/", data_send)
+
+
+    def data_parser(self, data):
+        new_data = {}
+        data = data.replace('\n\t', '').replace('\n', '')
+        data = data.split(';')
+        for row in data:
+            if row != '':
+                row = row.split('=')
+                nu = row[0].rstrip()
+                te = row[1].lstrip()
+                if '{' not in te:
+                    te = te.replace('"', '')
+                new_data[nu] = te
+        return new_data
 
 
     async def custom_request(self):
