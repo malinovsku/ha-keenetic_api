@@ -11,6 +11,20 @@
             "port_forwarding": {
                 "default": "mdi:arrange-bring-forward"
             }
+        },
+        "sensor": {
+            "clients_wifi": {
+                "default": "mdi:sitemap-outline"
+                },
+            "memory": {
+                "default": "mdi:memory"
+                },
+            "cpuload": {
+                "default": "mdi:cpu-32-bit"
+                },
+            "wan_ip_adress": {
+                "default": "mdi:ip-network"
+                }
         }
     },
     "services": {

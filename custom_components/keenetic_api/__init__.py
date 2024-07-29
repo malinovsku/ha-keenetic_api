@@ -46,6 +46,7 @@ from .const import (
     REQUEST_TIMEOUT,
     SCAN_INTERVAL_FIREWARE,
     FAST_SCAN_INTERVAL_FIREWARE,
+    CROUTER,
 )
 
 PLATFORMS: list[Platform] = [
@@ -84,6 +85,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         coordinator_rc_interface = None
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {
+        CROUTER: client,
         COORD_FULL: coordinator_full,
         COORD_FIREWARE: coordinator_firmware,
         COORD_RC_INTERFACE: coordinator_rc_interface
@@ -95,13 +97,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     async def request_api(service: ServiceCall):
         data_json = service.data.get("data_json", [])
-        response = await hass.data[DOMAIN][service.data["entry_id"]][COORD_FULL].router.api(service.data["method"], service.data["endpoint"], data_json)
+        response = await hass.data[DOMAIN][service.data["entry_id"]][CROUTER].api(service.data["method"], service.data["endpoint"], data_json)
         _LOGGER.debug(f'Services request_api response - {response}')
         return {"response": response}
     hass.services.async_register(DOMAIN, "request_api", request_api, supports_response=SupportsResponse.OPTIONAL)
 
     async def backup_router(service: ServiceCall):
-        response = await hass.data[DOMAIN][service.data["entry_id"]][COORD_FULL].router.async_backup(service.data["folder"], service.data["type"])
+        response = await hass.data[DOMAIN][service.data["entry_id"]][CROUTER].async_backup(service.data["folder"], service.data["type"])
         return True
     hass.services.async_register(DOMAIN, "backup_router", backup_router)
 

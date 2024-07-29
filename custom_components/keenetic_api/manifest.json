@@ -5,9 +5,9 @@
         "@malinovsku"
     ],
     "config_flow": true,
-    "documentation": "https://github.com/malinovsku/keenetic_api",
+    "documentation": "https://github.com/malinovsku/ha-keenetic_api",
     "iot_class": "local_polling",
-    "issue_tracker": "https://github.com/malinovsku/keenetic_api/issues",
+    "issue_tracker": "https://github.com/malinovsku/ha-keenetic_api/issues",
     "requirements": ["pyqrcode==1.2.1", "pypng==0.20220715.0"],
-    "version": "0.1"
+    "version": "0.2"
 }

@@ -29,3 +29,5 @@ FW_SANDBOX: Final = {
 
 POLICY_DEFAULT: Final = "default"
 POLICY_NOT_INTERNET: Final = "not_internet"
+
+CROUTER: Final = "client_router"

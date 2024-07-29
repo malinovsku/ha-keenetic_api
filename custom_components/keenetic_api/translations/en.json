@@ -102,6 +102,9 @@
         },
         "clients_wifi": {
           "name": "Clients WiFi"
+        },
+        "wan_ip_adress": {
+          "name": "WAN IP adress"
         }
       },
       "image": {
