@@ -36,11 +36,8 @@ async def async_setup_entry(
         interfaces = coordinator.data
         for interface in interfaces:
             interface_wifi = interfaces[interface]
-            interface_wifi['id'] = interface
-            interface_wifi['name_interface'] = INTERFACES_NAME.get(interface.split('/')[0], interface)
-            if (interface_wifi.get('ssid', False) and(
-                interface.startswith('WifiMaster0') 
-                or interface.startswith('WifiMaster1'))):
+            if (interface_wifi.ssid and
+                (interface_wifi.interface in ['WifiMaster0', 'WifiMaster1'])):
                     images.append(
                         KeeneticQrWiFiImageEntity(
                             coordinator,
@@ -74,7 +71,7 @@ class KeeneticQrWiFiImageEntity(CoordinatorEntity[KeeneticRouterRcInterfaceCoord
     ) -> None:
         super().__init__(coordinator)
         ImageEntity.__init__(self, coordinator.hass)
-        self._draft_name = f"{interface_wifi['name_interface']} {interface_wifi['ssid']}"
+        self._draft_name = f"{interface_wifi.name_interface} {interface_wifi.ssid}"
         self._attr_device_info = coordinator.device_info
         self._attr_unique_id = f"{coordinator.unique_id}_{self._attr_translation_key}_{self._draft_name}"
         self._attr_translation_placeholders = {"name": self._draft_name}
@@ -84,9 +81,12 @@ class KeeneticQrWiFiImageEntity(CoordinatorEntity[KeeneticRouterRcInterfaceCoord
 
     async def async_image(self) -> bytes | None:
         """Return bytes of image."""
-        wifi_ssid = self._interface_wifi["ssid"]
-        wifi_pass = self._interface_wifi["authentication"]["wpa-psk"]["psk"]
-        code = pyqrcode.create(f'WIFI:S:{wifi_ssid};T:WPA;P:{wifi_pass};;')
+        wifi_ssid = self._interface_wifi.ssid
+        wifi_pass = self._interface_wifi.password
+        if wifi_pass != None:
+            code = pyqrcode.create(f'WIFI:S:{wifi_ssid};T:WPA;P:{wifi_pass};;')
+        else:
+            code = pyqrcode.create(f'WIFI:S:{wifi_ssid};T:nopass;;;')
         code.png(self.image,scale=10)
         return self.image.getvalue()
 
@@ -94,8 +94,8 @@ class KeeneticQrWiFiImageEntity(CoordinatorEntity[KeeneticRouterRcInterfaceCoord
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
         if (
-            self._interface_wifi["ssid"] != self.coordinator.data[self._interface_wifi["id"]]["ssid"]
-            or self._interface_wifi["authentication"]["wpa-psk"]["psk"] != self.coordinator.data[self._interface_wifi["id"]]["authentication"]["wpa-psk"]["psk"]
+            self._interface_wifi.ssid != self.coordinator.data[self._interface_wifi["id"]].ssid
+            or self._interface_wifi.password != self.coordinator.data[self._interface_wifi["id"]].password
         ):
             self._interface_wifi = self.coordinator.data[self._interface_wifi['id']]
             self._attr_image_last_updated = dt_util.utcnow()
@@ -105,10 +105,10 @@ class KeeneticQrWiFiImageEntity(CoordinatorEntity[KeeneticRouterRcInterfaceCoord
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return extra attributes of the image."""
         return {
-            "interface": self._interface_wifi["id"],
-            "ssid": self._interface_wifi["ssid"],
-            "password": self._interface_wifi["authentication"]["wpa-psk"]["psk"],
-            "active": self._interface_wifi.get("up", False),
-            "rename": self._interface_wifi.get("rename", None),
-            "description": self._interface_wifi.get("description", None),
+            "interface": self._interface_wifi.id,
+            "ssid": self._interface_wifi.ssid,
+            "password": self._interface_wifi.password,
+            "active": self._interface_wifi.active,
+            "rename": self._interface_wifi.rename,
+            "description": self._interface_wifi.description,
         }

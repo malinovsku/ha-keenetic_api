@@ -45,6 +45,17 @@ class DataPortForwarding():
     comment: str
     disable: bool = False
 
+@dataclass
+class DataRcInterface():
+    id: str
+    name_interface: str
+    interface: str
+    ssid: str
+    password: str
+    active: str
+    rename: str
+    description: str
+
 
 INTERFACES_NAME = {
     "GigabitEthernet1": "WAN",
@@ -202,8 +213,25 @@ class Router:
         return await self.api("get", "/rci/show/interface")
 
     async def show_rc_interface(self):
-        return await self.api("get", "/rci/show/rc/interface")
-        # return await self.api("get", "/rci/interface")
+        interfaces = await self.api("get", "/rci/show/rc/interface")
+        interface_wifi = {}
+        for interface in interfaces:
+            interf = interfaces[interface]
+            if interf.get("authentication", False):
+                psw = interf["authentication"]["wpa-psk"]["psk"]
+            else:
+                psw = None
+            interface_wifi[interface] = DataRcInterface(
+                interface,
+                INTERFACES_NAME.get(interface.split('/')[0], interface),
+                interface.split('/')[0],
+                interf.get("ssid", False),
+                psw,
+                interf.get("up", False),
+                interf.get("rename", None),
+                interf.get("description", None),
+            )
+        return interface_wifi
 
     async def show_associations(self):
         return await self.api("get", "/rci/show/associations")
