@@ -21,6 +21,7 @@ class KeeneticFullData:
     show_rc_ip_static: dict[str, Any]
     show_associations: dict[str, Any]
     show_ip_hotspot_policy: dict[str, Any]
+    priority_interface: dict[str, Any]
 
 @dataclass
 class DataDevice():
@@ -267,6 +268,8 @@ class Router:
                 {"show": {"rc": {"ip": {"static": {}}}}},
 
                 {"show": {"rc": {"ip": {"hotspot": {}}}}},
+
+                {"show": {"rc": {"interface": {"ip": {"global": {}}}}}},
             ]
         else:
             data_json_send=[
@@ -285,6 +288,7 @@ class Router:
         show_ip_hotspot = {}
         show_rc_ip_static = {}
         show_ip_hotspot_policy = {}
+        priority_interface = {}
 
         for dsi in data_show_interface:
             show_interface[dsi] = data_show_interface[dsi]
@@ -325,5 +329,15 @@ class Router:
                     port_frw.get('comment', None), 
                     port_frw.get('disable', False), 
                 )
+            
+            priority_interface = full_info_other[6]['show']['rc']['interface']['ip']['global']
 
-        return KeeneticFullData(show_system, show_ip_hotspot, show_interface, show_rc_ip_static, show_associations, show_ip_hotspot_policy)
+        return KeeneticFullData(
+            show_system, 
+            show_ip_hotspot, 
+            show_interface, 
+            show_rc_ip_static, 
+            show_associations, 
+            show_ip_hotspot_policy,
+            priority_interface,
+            )

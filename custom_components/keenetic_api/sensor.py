@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from collections.abc import Callable
 from typing import Any
 from datetime import UTC, datetime, timedelta
+import logging
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -32,6 +33,8 @@ from .const import (
     COORD_FULL,
 )
 
+_LOGGER = logging.getLogger(__name__)
+
 
 @dataclass(frozen=True, kw_only=True)
 class KeeneticRouterSensorEntityDescription(SensorEntityDescription):
@@ -46,6 +49,23 @@ def convert_uptime(uptime: str) -> datetime:
     return datetime.now(tz=UTC) - timedelta(
         seconds=int(uptime),
     )
+
+
+def ind_wan_ip_adress(fdata: KeeneticFullData):
+    """Определение внешнего IP адреса."""
+    try:
+        data_p_i = fdata.priority_interface
+        show_interface = fdata.show_interface
+        priority_interface = sorted(data_p_i, key=lambda x: data_p_i[x]['order'])
+        for row in priority_interface:
+            if show_interface[row]["connected"] == "yes":
+                if row == 'Wireguard0':
+                    return show_interface[row]["wireguard"]["peer"][0]["remote"]
+                else:
+                    return show_interface[row]["address"]
+    except Exception as ex:
+        _LOGGER.debug(f'Not ind_wan_ip_adress - {ex}')
+        return None
 
 
 SENSOR_TYPES: tuple[KeeneticRouterSensorEntityDescription, ...] = (
@@ -78,8 +98,8 @@ SENSOR_TYPES: tuple[KeeneticRouterSensorEntityDescription, ...] = (
         key="wan_ip_adress",
         name="WAN IP adress",
         entity_category=EntityCategory.DIAGNOSTIC,
-        # value=lambda coordinator, key: coordinator.data.show_interface['GigabitEthernet1']['address'],
-        value=lambda coordinator, key: coordinator.data.show_interface.get('GigabitEthernet1').get('address') if coordinator.data.show_interface.get('GigabitEthernet1', None) is not None else None,
+        value=lambda coordinator, key: ind_wan_ip_adress(coordinator.data),
+        # value=lambda coordinator, key: coordinator.data.show_interface.get('GigabitEthernet1').get('address') if coordinator.data.show_interface.get('GigabitEthernet1', None) is not None else None,
     ),
     KeeneticRouterSensorEntityDescription(
         key="temperature_2_4g",
