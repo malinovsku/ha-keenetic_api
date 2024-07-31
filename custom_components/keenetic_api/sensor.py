@@ -42,6 +42,7 @@ class KeeneticRouterSensorEntityDescription(SensorEntityDescription):
     value: Callable[[KeeneticFullData, Any], Any] = (
         lambda coordinator, key: coordinator.data.show_system[key] if coordinator.data.show_system[key] is not None else None
     )
+    attributes_fn: Callable[[KeeneticFullData], dict[str, Any]] | None = None
 
 
 def convert_uptime(uptime: str) -> datetime:
@@ -148,3 +149,11 @@ class KeeneticRouterSensor(CoordinatorEntity[KeeneticRouterCoordinator], SensorE
     def native_value(self) -> StateType:
         """Sensor value."""
         return self.entity_description.value(self.coordinator, self.entity_description.key)
+
+    @property
+    def extra_state_attributes(self) -> dict[str, str] | None:
+        """Return the state attributes of the sensor."""
+        if self.entity_description.attributes_fn is not None:
+            return self.entity_description.attributes_fn(self.coordinator.data)
+        else:
+            return None

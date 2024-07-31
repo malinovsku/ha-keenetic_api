@@ -18,9 +18,12 @@ from .const import (
     DOMAIN,
     COORD_FULL,
     CONF_CREATE_PORT_FRW,
+    COORD_RC_INTERFACE,
 )
-from .coordinator import KeeneticRouterCoordinator
-from .keenetic import INTERFACES_NAME
+from .coordinator import (
+    KeeneticRouterCoordinator,
+)
+from .keenetic import DataRcInterface
 
 _LOGGING = logging.getLogger(__name__)
 
@@ -29,33 +32,33 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
 
     coordinator: KeeneticRouterCoordinator = hass.data[DOMAIN][entry.entry_id][COORD_FULL]
     switchs: list[SwitchEntity] = []
+    if coordinator.router.hw_type == "router":
+        rc_interface: DataRcInterface = hass.data[DOMAIN][entry.entry_id][COORD_RC_INTERFACE].data
 
-    interfaces = coordinator.data.show_interface
-    for interface, data_interface in interfaces.items():
-        if (
-            (data_interface.get('usedby', False)
-                and coordinator.router.hw_type == "router"
-                and (interface.startswith('WifiMaster0') 
-                    or interface.startswith('WifiMaster1')))
-            or interface == 'GigabitEthernet1'
-            or interface == 'Wireguard0'
-        ):
-            switchs.append(
-                KeeneticInterfaceSwitchEntity(
-                    coordinator,
-                    data_interface,
+        interfaces = coordinator.data.show_interface
+        for interface, data_interface in interfaces.items():
+            if ((data_interface.get('usedby', False)
+                        and (interface.startswith('WifiMaster0') 
+                            or interface.startswith('WifiMaster1')))
+                    or interface in coordinator.data.priority_interface
+            ):
+                switchs.append(
+                    KeeneticInterfaceSwitchEntity(
+                        coordinator,
+                        data_interface,
+                        rc_interface[interface].name_interface,
+                    )
                 )
-            )
 
-    if entry.options.get(CONF_CREATE_PORT_FRW, False):
-        port_forwardings = coordinator.data.show_rc_ip_static
-        for index, port_frw in port_forwardings.items():
-            switchs.append(
-                KeeneticPortForwardingSwitchEntity(
-                    coordinator,
-                    port_frw,
+        if entry.options.get(CONF_CREATE_PORT_FRW, False):
+            port_forwardings = coordinator.data.show_rc_ip_static
+            for index, port_frw in port_forwardings.items():
+                switchs.append(
+                    KeeneticPortForwardingSwitchEntity(
+                        coordinator,
+                        port_frw,
+                    )
                 )
-            )
 
     async_add_entities(switchs)
 
@@ -73,13 +76,14 @@ class KeeneticInterfaceSwitchEntity(CoordinatorEntity[KeeneticRouterCoordinator]
         self,
         coordinator: KeeneticRouterCoordinator,
         data_interface,
+        name_interface
     ) -> None:
         """Initialize the Keenetic Interface switch."""
         super().__init__(coordinator)
         self._id_interface = data_interface['id']
-        self._name_interface = data_interface['name']
+        self._name_interface = name_interface
         self._attr_translation_key = self._attr_key
-        self._attr_unique_id = f"{coordinator.unique_id}_{self._attr_key}_{self._name_interface}"
+        self._attr_unique_id = f"{coordinator.unique_id}_{self._attr_key}_{self._id_interface}"
         self._attr_device_info = coordinator.device_info
         self._attr_translation_placeholders = {"name_interface": f"{self._name_interface}"}
 

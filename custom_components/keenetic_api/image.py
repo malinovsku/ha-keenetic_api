@@ -19,7 +19,6 @@ from .const import (
     COORD_RC_INTERFACE,
 )
 from .coordinator import KeeneticRouterRcInterfaceCoordinator
-from .keenetic import INTERFACES_NAME
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -71,7 +70,7 @@ class KeeneticQrWiFiImageEntity(CoordinatorEntity[KeeneticRouterRcInterfaceCoord
     ) -> None:
         super().__init__(coordinator)
         ImageEntity.__init__(self, coordinator.hass)
-        self._draft_name = f"{interface_wifi.name_interface} {interface_wifi.ssid}"
+        self._draft_name = f"{interface_wifi.name_interface}"
         self._attr_device_info = coordinator.device_info
         self._attr_unique_id = f"{coordinator.unique_id}_{self._attr_translation_key}_{self._draft_name}"
         self._attr_translation_placeholders = {"name": self._draft_name}

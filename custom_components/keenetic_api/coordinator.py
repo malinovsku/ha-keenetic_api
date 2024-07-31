@@ -9,7 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC, DeviceInfo
 from homeassistant.const import CONF_HOST
 
-from .keenetic import Router, INTERFACES_NAME
+from .keenetic import Router
 from .const import (
     DOMAIN, 
     FW_SANDBOX,

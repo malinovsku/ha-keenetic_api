@@ -57,9 +57,7 @@ class DataRcInterface():
     description: str
 
 
-INTERFACES_NAME = {
-    "GigabitEthernet1": "WAN",
-    "Wireguard0": "Wireguard",
+INTERFACES_WIFI_NAME = {
     "WifiMaster0": "WiFi 2.4g",
     "WifiMaster1": "WiFi 5g"
 }
@@ -217,13 +215,16 @@ class Router:
         interface_wifi = {}
         for interface in interfaces:
             interf = interfaces[interface]
-            if interf.get("authentication", False):
+            if (interf.get("authentication", False) 
+                and interf.get("authentication").get("wpa-psk", False)
+                and interf.get("authentication").get("wpa-psk").get("psk", False)):
                 psw = interf["authentication"]["wpa-psk"]["psk"]
             else:
                 psw = None
+            nm_inerface = f"{INTERFACES_WIFI_NAME.get(interface.split('/')[0], interface)} {interf.get('ssid', '')}"
             interface_wifi[interface] = DataRcInterface(
                 interface,
-                INTERFACES_NAME.get(interface.split('/')[0], interface),
+                nm_inerface,
                 interface.split('/')[0],
                 interf.get("ssid", False),
                 psw,
@@ -309,21 +310,14 @@ class Router:
         full_info_other = await self.api("post", "/rci/", json=data_json_send)
 
         show_system = full_info_other[0]['show']['system']
-        data_show_interface = full_info_other[1]['show']['interface']
+        show_interface = full_info_other[1]['show']['interface']
         show_associations = full_info_other[2]['show']['associations']
 
-        show_interface = {}
         show_ip_hotspot = {}
         show_rc_ip_static = {}
         show_ip_hotspot_policy = {}
         priority_interface = {}
 
-        for dsi in data_show_interface:
-            show_interface[dsi] = data_show_interface[dsi]
-            nm = INTERFACES_NAME.get(dsi.split('/')[0], dsi)
-            if dsi.startswith('WifiMaster0') or dsi.startswith('WifiMaster1'):
-                nm = f"{nm} {data_show_interface[dsi]['interface-name']}"
-            show_interface[dsi]['name'] = nm
 
         if self.hw_type == "router":
             data_show_ip_hotspot = full_info_other[3]['show']['ip']['hotspot']['host']
@@ -346,8 +340,10 @@ class Router:
 
             data_show_rc_ip_static = full_info_other[4]['show']['rc']['ip']['static']
             for port_frw in data_show_rc_ip_static:
+                nm_pfrw = port_frw.get('comment', port_frw.get('index'))
+                nm_pfrw = nm_pfrw if nm_pfrw != "" else port_frw.get('index')
                 show_rc_ip_static[port_frw["index"]] = DataPortForwarding(
-                    port_frw.get('comment', port_frw.get('index')), 
+                    nm_pfrw, 
                     port_frw.get('interface'), 
                     port_frw.get('protocol'), 
                     port_frw.get('port'), 
