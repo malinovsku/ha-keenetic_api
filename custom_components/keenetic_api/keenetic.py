@@ -128,7 +128,7 @@ class Router:
             async with self._session.get(download_url, timeout=180) as response:
                     if response.status != 200:
                         raise Exception('Got non-200 response!')
-                    async with aiofiles.open(f"{folder}/{response.content_disposition.filename}", 'wb') as file:
+                    async with aiofiles.open(f"{folder}/{self._mac}-{response.content_disposition.filename}", 'wb') as file:
                         async for data, _ in response.content.iter_chunks():
                             await file.write(data)
         except asyncio.TimeoutError as err:

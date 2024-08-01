@@ -35,6 +35,8 @@ from .const import (
     CONF_CREATE_IMAGE_QR,
     CONF_CREATE_DT,
     CONF_CREATE_PORT_FRW,
+    DEFAULT_BACKUP_TYPE_FILE,
+    CONF_BACKUP_TYPE_FILE,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -162,6 +164,13 @@ class OptionsFlow(config_entries.OptionsFlow):
                             CONF_CREATE_PORT_FRW, False
                         ),
                     ): bool,
+                    vol.Optional(
+                        CONF_BACKUP_TYPE_FILE,
+                        default=self._options.get(CONF_BACKUP_TYPE_FILE, DEFAULT_BACKUP_TYPE_FILE),
+                    ): cv.multi_select([
+                        "config",
+                        "firmware",
+                    ]),
                 }
             ),
             last_step=False,

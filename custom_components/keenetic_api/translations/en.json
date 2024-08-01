@@ -30,7 +30,8 @@
             "create_entity_all_cliens_button_policy": "Создать объекты Select политик для всех устройств.",
             "cliens_select_policy": "Создать объекты Select политик по выбранным устройствам.",
             "create_device_tracker": "Создать объекты device_tracker по всем устройствам.",
-            "create_entity_port_forwarding": "Создать объекты Switch по всем port forwarding."
+            "create_entity_port_forwarding": "Создать объекты Switch по всем port forwarding.",
+            "backup_type_file": "Файлы бекапа для скачивания при обновлении."
           }
         },
         "configure_other": {
@@ -110,6 +111,11 @@
       "image": {
         "qrwifi": {
           "name": "{name}"
+        }
+      },
+      "binary_sensor": {
+        "connected_to_interface": {
+          "name": "{name} Connected"
         }
       },
       "switch": {

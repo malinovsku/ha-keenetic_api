@@ -36,7 +36,12 @@ BINARY_SENSOR_TYPES: dict[str, KeeneticBinarySensorEntityDescription] = {
     "connected_to_router": KeeneticBinarySensorEntityDescription(
         key="connected_to_router",
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
-        value_fn= lambda coordinator: coordinator.last_update_success,
+        value_fn= lambda coordinator, enti: coordinator.last_update_success,
+    ),
+    "connected_to_interface": KeeneticBinarySensorEntityDescription(
+        key="connected_to_interface",
+        device_class=BinarySensorDeviceClass.CONNECTIVITY,
+        value_fn= lambda coordinator, enti: coordinator.data.show_interface[enti].get('connected', "no") == "yes",
     ),
 }
 
@@ -46,13 +51,23 @@ async def async_setup_entry(
     entry: ConfigEntry, 
     async_add_entities: AddEntitiesCallback
 ) -> None:
+
     coordinator = hass.data[DOMAIN][entry.entry_id][COORD_FULL]
-    entities: list[BinarySensorEntity] = []
+    binary_sensors: list[BinarySensorEntity] = []
 
-    for key, description in BINARY_SENSOR_TYPES.items():
-        entities.append(KeeneticBinarySensorEntity(coordinator, description))
+    binary_sensors.append(KeeneticBinarySensorEntity(coordinator, BINARY_SENSOR_TYPES["connected_to_router"], "status_router"))
 
-    async_add_entities(entities, False)
+    for interface, data_interface in coordinator.data.show_interface.items():
+        if interface in coordinator.data.priority_interface:
+            binary_sensors.append(
+                KeeneticBinarySensorEntity(
+                    coordinator,
+                    BINARY_SENSOR_TYPES["connected_to_interface"],
+                    interface,
+                )
+            )
+
+    async_add_entities(binary_sensors, False)
 
 
 class KeeneticBinarySensorEntity(CoordinatorEntity[KeeneticRouterCoordinator], BinarySensorEntity):
@@ -64,16 +79,24 @@ class KeeneticBinarySensorEntity(CoordinatorEntity[KeeneticRouterCoordinator], B
         self,
         coordinator: KeeneticRouterCoordinator,
         description: KeeneticBinarySensorEntityDescription,
+        enti = ""
     ) -> None:
         super().__init__(coordinator)
-        self._attr_device_info = coordinator.device_info
-        self._attr_unique_id = f"{coordinator.unique_id}_{description.key}"
+        self._enti = enti
+        self._attr_key = description.key
         self.entity_description = description
+        self._attr_device_info = coordinator.device_info
+        self._attr_unique_id = f"{coordinator.unique_id}_{self._attr_key}_{self._enti}"
+        self._attr_translation_key = self._attr_key
+        self._attr_translation_placeholders = {"name": f"{self._enti}"}
 
     @property
     def is_on(self) -> bool:
-        return self.entity_description.value_fn(self.coordinator)
+        return self.entity_description.value_fn(self.coordinator, self._enti)
 
     @property
     def available(self) -> bool:
-        return True
+        if self.entity_description.key == "connected_to_router":
+            return True
+        else:
+            return self.coordinator.last_update_success

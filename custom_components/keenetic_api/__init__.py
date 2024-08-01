@@ -78,7 +78,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     except Exception as err:
         _LOGGER.error(f'coordinator_firmware error - {err}')
 
-    if client.hw_type == "router" and entry.options.get("create_image_qr", False):
+    if client.hw_type == "router":
         coordinator_rc_interface = KeeneticRouterRcInterfaceCoordinator(hass, client, SCAN_INTERVAL_FIREWARE, entry)
         await coordinator_rc_interface.async_config_entry_first_refresh()
     else:

@@ -31,7 +31,7 @@ async def async_setup_entry(
     coordinator = hass.data[DOMAIN][entry.entry_id][COORD_RC_INTERFACE]
     images: list[ImageEntity] = []
 
-    if coordinator != None:
+    if coordinator != None and entry.options.get("create_image_qr", False):
         interfaces = coordinator.data
         for interface in interfaces:
             interface_wifi = interfaces[interface]

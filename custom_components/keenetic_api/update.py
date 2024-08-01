@@ -23,6 +23,8 @@ from .const import (
     COORD_FIREWARE, 
     FAST_SCAN_INTERVAL_FIREWARE, 
     SCAN_INTERVAL_FIREWARE,
+    DEFAULT_BACKUP_TYPE_FILE,
+    CONF_BACKUP_TYPE_FILE,
 )
 from .coordinator import KeeneticRouterFirmwareCoordinator
 
@@ -35,7 +37,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback
 ) -> None:
     coordinator = hass.data[DOMAIN][entry.entry_id][COORD_FIREWARE]
-    entities = [KeeneticUpdateEntity(coordinator)]
+    entities = [KeeneticUpdateEntity(coordinator, entry.options.get(CONF_BACKUP_TYPE_FILE, DEFAULT_BACKUP_TYPE_FILE))]
     async_add_entities(entities)
 
 
@@ -45,20 +47,23 @@ class KeeneticUpdateEntity(CoordinatorEntity[KeeneticRouterFirmwareCoordinator],
     _attr_device_class = UpdateDeviceClass.FIRMWARE
     _attr_entity_category=EntityCategory.CONFIG
     # _attr_available=False
-    _attr_supported_features = (
-        UpdateEntityFeature.INSTALL | 
-        UpdateEntityFeature.PROGRESS |
-        UpdateEntityFeature.BACKUP 
-    )
 
     def __init__(
         self,
         coordinator: KeeneticRouterFirmwareCoordinator,
+        backup_type_file,
     ) -> None:
         super().__init__(coordinator)
         self._attr_device_info = coordinator.device_info
         self._attr_unique_id = f"{coordinator.unique_id}_main_update"
         self._in_progress_old_version: str | None = None
+        self._backup_type_file = backup_type_file
+        self._attr_supported_features = (
+            UpdateEntityFeature.INSTALL | 
+            UpdateEntityFeature.PROGRESS 
+        )
+        if len(self._backup_type_file) > 0:
+            self._attr_supported_features |= UpdateEntityFeature.BACKUP
 
     @property
     def title(self) -> str | None:
@@ -104,7 +109,7 @@ class KeeneticUpdateEntity(CoordinatorEntity[KeeneticRouterFirmwareCoordinator],
                 download_path = "keenetic_backup"
                 if not await self.hass.async_add_executor_job(os.path.isabs, download_path):
                     download_path = self.hass.config.path(download_path)
-                await self.coordinator.router.async_backup(download_path)
+                await self.coordinator.router.async_backup(download_path, self._backup_type_file)
             await self.coordinator.router.async_update()
         except Exception as err:
             self._in_progress_old_version = None
