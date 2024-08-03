@@ -165,27 +165,27 @@ def remove_entities_or_devices(hass, entry) -> None:
     for entity in er.async_entries_for_config_entry(entity_registry, entry.entry_id):
         delete_ent = False
         if (
-            not entry.options.get(CONF_CREATE_DT, True) 
-            and entity.domain == "device_tracker"
+            entity.domain == "device_tracker"
+            and not entry.options.get(CONF_CREATE_DT, True) 
         ):
             delete_ent = True
         elif (
-            not entry.options.get(CONF_CREATE_PORT_FRW, True) 
-            and entity.domain == "switch" 
+            entity.domain == "switch" 
             and entity.translation_key == "port_forwarding"
+            and not entry.options.get(CONF_CREATE_PORT_FRW, True) 
         ):
             delete_ent = True
         elif (
-            not entry.options.get(CONF_CREATE_IMAGE_QR, True) 
-            and entity.domain == "image" 
+            entity.domain == "image" 
             and entity.translation_key == "qrwifi"
+            and not entry.options.get(CONF_CREATE_IMAGE_QR, True) 
         ):
             delete_ent = True
         elif (
-            not entry.options.get(CONF_CREATE_ALL_CLIENTS_POLICY, True) 
-            and hass.states.get(entity.entity_id).attributes.get("mac") not in entry.options.get(CONF_CLIENTS_SELECT_POLICY, []) 
-            and entity.domain == "select" 
+            entity.domain == "select" 
             and entity.translation_key == "client_policy"
+            and not entry.options.get(CONF_CREATE_ALL_CLIENTS_POLICY, True) 
+            and hass.states.get(entity.entity_id).attributes.get("mac") not in entry.options.get(CONF_CLIENTS_SELECT_POLICY, []) 
         ):
             delete_ent = True
         if delete_ent:
