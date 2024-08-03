@@ -112,3 +112,10 @@ class KeeneticPolicySelectEntity(CoordinatorEntity[KeeneticRouterCoordinator], S
     @property
     def available(self) -> bool:
         return True if self.current_option != None else False
+
+    @property
+    def extra_state_attributes(self) -> dict[str, StateType]:
+        """Return the state attributes."""
+        return {
+            "mac": self._mac,
+        }
