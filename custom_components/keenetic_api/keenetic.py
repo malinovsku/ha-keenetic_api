@@ -32,6 +32,9 @@ class DataDevice():
     active: bool
     interface_id: str
     uptime: int
+    rssi: str
+    rxbytes: int
+    txbytes: int
 
 @dataclass
 class DataPortForwarding():
@@ -332,7 +335,11 @@ class Router:
                     hotspot.get('active'), 
                     hotspot.get('interface', {"id": None}).get('id'),
                     hotspot.get('uptime'), 
+                    hotspot.get('rssi'), 
+                    hotspot.get('rxbytes'), 
+                    hotspot.get('txbytes'), 
                 )
+
 
             for hotspot_pl in data_show_ip_hotspot_policy:
                 show_ip_hotspot_policy[hotspot_pl["mac"]] = hotspot_pl

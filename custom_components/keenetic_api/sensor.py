@@ -45,11 +45,12 @@ class KeeneticRouterSensorEntityDescription(SensorEntityDescription):
     attributes_fn: Callable[[KeeneticFullData], dict[str, Any]] | None = None
 
 
-def convert_uptime(uptime: str) -> datetime:
+def convert_uptime(update_success_time: str, uptime: str) -> datetime:
     """Convert uptime."""
-    return datetime.now(tz=UTC) - timedelta(
-        seconds=int(uptime),
-    )
+    time_start = update_success_time.replace(microsecond=0) - timedelta(seconds=int(uptime))
+    _LOGGER.debug(f"Convert uptime: {update_success_time} / {uptime} / {time_start}")
+    return time_start
+
 
 def ind_wan_ip_adress(fdata: KeeneticFullData):
     """Определение внешнего IP адреса."""
@@ -59,7 +60,7 @@ def ind_wan_ip_adress(fdata: KeeneticFullData):
         priority_interface = sorted(data_p_i, key=lambda x: data_p_i[x]['order'])
         for row in priority_interface:
             if show_interface[row]["connected"] == "yes":
-                if row == 'Wireguard0':
+                if row.startswith('Wireguard'):
                     return show_interface[row]["wireguard"]["peer"][0]["remote"]
                 else:
                     return show_interface[row]["address"]
@@ -84,7 +85,7 @@ SENSOR_TYPES: tuple[KeeneticRouterSensorEntityDescription, ...] = (
         key="uptime",
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
-        value=lambda coordinator, key: convert_uptime(coordinator.data.show_system[key]),
+        value=lambda coordinator, key: convert_uptime(coordinator.last_update_success_time, coordinator.data.show_system[key]),
     ),
     KeeneticRouterSensorEntityDescription(
         key="wan_ip_adress",

@@ -13,6 +13,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC, DeviceInfo, format_mac
+from homeassistant.helpers.typing import StateType
 
 from .const import (
     DOMAIN,
@@ -84,15 +85,17 @@ class KeeneticPolicySelectEntity(CoordinatorEntity[KeeneticRouterCoordinator], S
 
     @property
     def current_option(self) -> str | None:
-        cln = self.coordinator.data.show_ip_hotspot_policy[self._mac]
-        if cln.get("policy") == None:
-            if cln.get("access") == "permit":
-                policy = POLICY_DEFAULT
-            elif cln.get("access") == "deny":
-                policy = POLICY_NOT_INTERNET
+        if cln := self.coordinator.data.show_ip_hotspot_policy.get(self._mac, False):
+            if cln.get("policy") == None:
+                if cln.get("access") == "permit":
+                    policy = POLICY_DEFAULT
+                elif cln.get("access") == "deny":
+                    policy = POLICY_NOT_INTERNET
+            else:
+                policy = cln["policy"]
+            return self._select_options[policy]
         else:
-            policy = cln["policy"]
-        return self._select_options[policy]
+            return None
 
     async def async_select_option(self, option: str) -> None:
         policy = False
@@ -106,4 +109,6 @@ class KeeneticPolicySelectEntity(CoordinatorEntity[KeeneticRouterCoordinator], S
         resp = await self.coordinator.router.ip_hotspot_host_policy(self._mac, new_option, policy)
         await self.coordinator.async_request_refresh()
 
-
+    @property
+    def available(self) -> bool:
+        return True if self.current_option != None else False

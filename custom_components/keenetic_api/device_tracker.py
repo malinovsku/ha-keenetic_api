@@ -37,7 +37,11 @@ async def async_setup_entry(
         if entry.options.get(CONF_CREATE_DT):
             for mac, device in coordinator.data.show_ip_hotspot.items():
                 if mac not in tracked:
-                    tracked[mac] = KeeneticScannerEntity(coordinator, mac)
+                    tracked[mac] = KeeneticScannerEntity(
+                        coordinator, 
+                        mac, 
+                        device.name or device.hostname or device.mac,
+                    )
                     new_device.append(tracked[mac])
         async_add_entities(new_device)
 
@@ -48,28 +52,25 @@ async def async_setup_entry(
 class KeeneticScannerEntity(CoordinatorEntity[KeeneticRouterCoordinator], ScannerEntity, RestoreEntity):
     _unrecorded_attributes = frozenset({
         "uptime",
+        "rssi",
+        "rxbytes",
+        "txbytes",
     })
 
-    def __init__(self, coordinator: KeeneticRouterCoordinator, mac: str) -> None:
+    def __init__(
+        self, 
+        coordinator: KeeneticRouterCoordinator, 
+        mac: str,
+        hostname: str,
+    ) -> None:
         """Initialize the device."""
         super().__init__(coordinator)
         self._mac = mac
-        self._via_device_mac = coordinator.router.mac,
+        self._attr_name = hostname
+        self._attr_hostname = hostname
+        self._via_device_mac = coordinator.router.mac
         self._attr_unique_id = f"{coordinator.unique_id}_dt_{self._mac}"
-
-    @property
-    def device(self) -> Device:
-        """Return the device entity."""
-        return self.coordinator.data.show_ip_hotspot[self._mac]
-
-    @property
-    def name(self) -> str:
-        """Return the name of the device."""
-        return (
-            self.device.name
-            or self.device.hostname
-            or self.device.mac
-        )
+        self._ip_address = None
 
     @property
     def source_type(self) -> str:
@@ -78,36 +79,43 @@ class KeeneticScannerEntity(CoordinatorEntity[KeeneticRouterCoordinator], Scanne
 
     @property
     def is_connected(self) -> bool:
-        """Get whether the entity is connected."""
-        return self.device.active or False
+        return any(
+            devs.active
+            for mac, devs in self.coordinator.data.show_ip_hotspot.items()
+            if mac == self._mac and devs.active
+        )
 
     @property
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
         return DeviceInfo(
             identifiers={(DOMAIN, self.unique_id)},
-            connections={(CONNECTION_NETWORK_MAC, self.device.mac)},
-            name=self.name,
+            connections={(CONNECTION_NETWORK_MAC, self._mac)},
+            name=self._attr_name,
             # via_device=(DOMAIN, format_mac(self._via_device_mac))
         )
 
     @property
     def extra_state_attributes(self) -> dict[str, StateType]:
         """Return the state attributes of the device."""
-        return {"interface_type": self.device.interface_id,
-                "uptime": self.device.uptime}
-
-    @property
-    def ip_address(self) -> str:
-        """Return the primary ip address of the device."""
-        return self.device.ip or None
+        if self._mac in self.coordinator.data.show_ip_hotspot:
+            dt_hotspot = self.coordinator.data.show_ip_hotspot[self._mac]
+            self._ip_address = dt_hotspot.ip
+            return {"interface_type": dt_hotspot.interface_id,
+                    "uptime": dt_hotspot.uptime,
+                    "rssi": dt_hotspot.rssi,
+                    "rxbytes": dt_hotspot.rxbytes,
+                    "txbytes": dt_hotspot.txbytes,
+                    }
+        else:
+            return None
 
     @property
     def mac_address(self) -> str:
         """Return the mac address of the device."""
-        return self.device.mac
+        return self._mac
 
     @property
-    def hostname(self) -> str:
-        """Return hostname of the device."""
-        return self.device.hostname or self.device.name
+    def ip_address(self) -> str:
+        """Return the IP address."""
+        return self._ip_address

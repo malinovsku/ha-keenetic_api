@@ -17,7 +17,7 @@ from homeassistant.const import (
     CONF_PORT,
     Platform,
 )
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers import aiohttp_client, device_registry as dr
 from homeassistant.core import (
@@ -28,7 +28,7 @@ from homeassistant.core import (
 )
 from homeassistant.exceptions import HomeAssistantError, ConfigEntryNotReady
 from homeassistant.helpers.json import json_loads
-from homeassistant.helpers import entity_registry
+from homeassistant.helpers import entity_registry as er
 
 from .coordinator import (
     KeeneticRouterCoordinator, 
@@ -47,6 +47,11 @@ from .const import (
     SCAN_INTERVAL_FIREWARE,
     FAST_SCAN_INTERVAL_FIREWARE,
     CROUTER,
+    CONF_CREATE_DT,
+    CONF_CREATE_ALL_CLIENTS_POLICY,
+    CONF_CLIENTS_SELECT_POLICY,
+    CONF_CREATE_PORT_FRW,
+    CONF_CREATE_IMAGE_QR,
 )
 
 PLATFORMS: list[Platform] = [
@@ -107,6 +112,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         return True
     hass.services.async_register(DOMAIN, "backup_router", backup_router)
 
+
+    remove_entities_or_devices(hass, entry)
+
     return True
 
 
@@ -147,3 +155,51 @@ async def get_api(hass: HomeAssistant, data: dict[str, Any]) -> Router:
     )
     await client.async_setup_obj()
     return client
+
+
+@callback
+def remove_entities_or_devices(hass, entry) -> None:
+    entity_registry = er.async_get(hass)
+    for entity in er.async_entries_for_config_entry(entity_registry, entry.entry_id):
+        delete_ent = False
+        if (
+            not entry.options.get(CONF_CREATE_DT, True) 
+            and entity.domain == "device_tracker"
+        ):
+            delete_ent = True
+        elif (
+            not entry.options.get(CONF_CREATE_PORT_FRW, True) 
+            and entity.domain == "switch" 
+            and entity.translation_key == "port_forwarding"
+        ):
+            delete_ent = True
+        elif (
+            not entry.options.get(CONF_CREATE_IMAGE_QR, True) 
+            and entity.domain == "image" 
+            and entity.translation_key == "qrwifi"
+        ):
+            delete_ent = True
+        elif (
+            not entry.options.get(CONF_CREATE_ALL_CLIENTS_POLICY, True) 
+            and hass.states.get(entity.entity_id).attributes.get("mac") not in entry.options.get(CONF_CLIENTS_SELECT_POLICY, []) 
+            and entity.domain == "select" 
+            and entity.translation_key == "client_policy"
+        ):
+            delete_ent = True
+        if delete_ent:
+            _LOGGER.debug(f"Removing entity: {entity}")
+            entity_registry.async_remove(entity.entity_id)
+
+    device_registry = dr.async_get(hass)
+    for device_entry in dr.async_entries_for_config_entry(device_registry, entry.entry_id):
+        if (
+            len(
+                er.async_entries_for_device(
+                    entity_registry, 
+                    device_entry.id
+                )
+            )
+            == 0
+        ):
+            _LOGGER.debug(f"Removing device: {device_entry.name} / {device_entry.identifiers}")
+            device_registry.async_remove_device(device_entry.id)

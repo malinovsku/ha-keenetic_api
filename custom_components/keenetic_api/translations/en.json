@@ -78,7 +78,7 @@
     "entity": {
       "select": {
         "client_policy": {
-          "name": "Сlient Policy",
+          "name": "Client Policy",
           "state": {
             "default": "Default",
             "not_internet": "Not internet"
