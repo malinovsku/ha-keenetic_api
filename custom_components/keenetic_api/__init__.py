@@ -112,8 +112,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         return True
     hass.services.async_register(DOMAIN, "backup_router", backup_router)
 
-
-    remove_entities_or_devices(hass, entry)
+    try:
+        remove_entities_or_devices(hass, entry)
+    except Exception as err:
+        _LOGGER.error(f'remove_entities_or_devices - {err}')
 
     return True
 
