@@ -162,7 +162,8 @@ async def get_api(hass: HomeAssistant, data: dict[str, Any]) -> Router:
 @callback
 def remove_entities_or_devices(hass, entry) -> None:
     entity_registry = er.async_get(hass)
-    for entity in er.async_entries_for_config_entry(entity_registry, entry.entry_id):
+    entity_conf = er.async_entries_for_config_entry(entity_registry, entry.entry_id)
+    for entity in entity_conf:
         delete_ent = False
         if (
             entity.domain == "device_tracker"
@@ -194,14 +195,11 @@ def remove_entities_or_devices(hass, entry) -> None:
 
     device_registry = dr.async_get(hass)
     for device_entry in dr.async_entries_for_config_entry(device_registry, entry.entry_id):
-        if (
-            len(
-                er.async_entries_for_device(
-                    entity_registry, 
-                    device_entry.id
-                )
-            )
-            == 0
-        ):
-            _LOGGER.debug(f"Removing device: {device_entry.name} / {device_entry.identifiers}")
+        entity_dev = er.async_entries_for_device(entity_registry, device_entry.id)
+
+        if (len(entity_dev) == 0):
+            _LOGGER.debug(f"Removing device: {device_entry}")
             device_registry.async_remove_device(device_entry.id)
+        elif not any(x in {x.entity_id for x in entity_conf} for x in {x.entity_id for x in entity_dev}):
+            _LOGGER.debug(f"Update device, remove_config_entry_id: {device_entry}")
+            device_registry.async_update_device(device_entry.id, remove_config_entry_id=entry.entry_id)

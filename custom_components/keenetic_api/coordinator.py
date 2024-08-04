@@ -7,7 +7,6 @@ import logging
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator, 
     UpdateFailed,
-    TimestampDataUpdateCoordinator,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC, DeviceInfo
@@ -25,7 +24,7 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-class KeeneticRouterCoordinator(TimestampDataUpdateCoordinator):
+class KeeneticRouterCoordinator(DataUpdateCoordinator):
     def __init__(
             self,
             hass: HomeAssistant,

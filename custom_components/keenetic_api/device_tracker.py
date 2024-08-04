@@ -89,7 +89,6 @@ class KeeneticScannerEntity(CoordinatorEntity[KeeneticRouterCoordinator], Scanne
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
         return DeviceInfo(
-            identifiers={(DOMAIN, self.unique_id)},
             connections={(CONNECTION_NETWORK_MAC, self._mac)},
             name=self._attr_name,
             # via_device=(DOMAIN, format_mac(self._via_device_mac))

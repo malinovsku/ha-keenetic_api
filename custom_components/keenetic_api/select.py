@@ -77,8 +77,6 @@ class KeeneticPolicySelectEntity(CoordinatorEntity[KeeneticRouterCoordinator], S
         self._attr_options = list([select_options[policy] for policy in select_options])
         self._attr_device_info = DeviceInfo(
             connections={(CONNECTION_NETWORK_MAC, self._mac)},
-            identifiers={(DOMAIN, self._mac)},
-            # default_name=self._hostname,
             name=self._hostname,
             # via_device=(DOMAIN, format_mac(self.coordinator.router.mac)),
         )
