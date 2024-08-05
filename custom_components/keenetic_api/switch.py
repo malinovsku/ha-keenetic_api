@@ -25,8 +25,25 @@ from .coordinator import (
 )
 from .keenetic import DataRcInterface
 
-_LOGGING = logging.getLogger(__name__)
+_LOGGER = logging.getLogger(__name__)
 
+
+@dataclass(frozen=True, kw_only=True)
+class KeeneticSwitchEntityDescription(SwitchEntityDescription):
+
+    is_on_func: Callable[[KeeneticRouterCoordinator], bool | None]
+    on_func: Callable[[KeeneticRouterCoordinator], None]
+    off_func: Callable[[KeeneticRouterCoordinator], None]
+
+SWITCH_TYPES: tuple[KeeneticSwitchEntityDescription, ...] = (
+    KeeneticSwitchEntityDescription(
+        key="web_configurator_access",
+        translation_key="web_configurator_access",
+        is_on_func=lambda coordinator: coordinator.data.show_rc_ip_http['security-level'].get('public', False),
+        on_func=lambda coordinator: coordinator.router.turn_on_off_web_configurator_access(True),
+        off_func=lambda coordinator: coordinator.router.turn_on_off_web_configurator_access(False),
+    ),
+)
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback,) -> None:
 
@@ -60,12 +77,44 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                     )
                 )
 
+        for description in SWITCH_TYPES:
+            switchs.append(KeeneticSwitchEntity(coordinator, description))
+
     async_add_entities(switchs)
+
+
+class KeeneticSwitchEntity(CoordinatorEntity[KeeneticRouterCoordinator], SwitchEntity):
+
+    entity_description: KeeneticSwitchEntityDescription
+    _attr_has_entity_name = True
+
+    def __init__(
+        self,
+        coordinator: KeeneticSwitchEntityDescription,
+        entity_description: KeeneticSwitchEntityDescription,
+    ) -> None:
+        super().__init__(coordinator)
+        self.entity_description = entity_description
+        self._attr_translation_key = self.entity_description.key
+        self._attr_unique_id = f"{coordinator.unique_id}_{self._attr_translation_key}_{self._attr_translation_key}"
+        self._attr_device_info = coordinator.device_info
+
+    @property
+    def is_on(self) -> bool:
+        return bool(self.entity_description.is_on_func(self.coordinator))
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        await self.entity_description.on_func(self.coordinator)
+        await self.coordinator.async_request_refresh()
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        await self.entity_description.off_func(self.coordinator)
+        await self.coordinator.async_request_refresh()
 
 
 class KeeneticInterfaceSwitchEntity(CoordinatorEntity[KeeneticRouterCoordinator], SwitchEntity):
 
-    _attr_key="interface"
+    _attr_translation_key="interface"
     _attr_has_entity_name = True
 
     _unrecorded_attributes = frozenset({
@@ -82,8 +131,7 @@ class KeeneticInterfaceSwitchEntity(CoordinatorEntity[KeeneticRouterCoordinator]
         super().__init__(coordinator)
         self._id_interface = data_interface['id']
         self._name_interface = name_interface
-        self._attr_translation_key = self._attr_key
-        self._attr_unique_id = f"{coordinator.unique_id}_{self._attr_key}_{self._id_interface}"
+        self._attr_unique_id = f"{coordinator.unique_id}_{self._attr_translation_key}_{self._id_interface}"
         self._attr_device_info = coordinator.device_info
         self._attr_translation_placeholders = {"name_interface": f"{self._name_interface}"}
 
@@ -113,7 +161,7 @@ class KeeneticInterfaceSwitchEntity(CoordinatorEntity[KeeneticRouterCoordinator]
 
 class KeeneticPortForwardingSwitchEntity(CoordinatorEntity[KeeneticRouterCoordinator], SwitchEntity):
 
-    _attr_key="port_forwarding"
+    _attr_translation_key="port_forwarding"
     _attr_has_entity_name = True
 
     def __init__(
@@ -126,8 +174,7 @@ class KeeneticPortForwardingSwitchEntity(CoordinatorEntity[KeeneticRouterCoordin
         self._pfrw = port_frw
         self._pfrw_index = port_frw.index
         self._pfrw_name = port_frw.name
-        self._attr_translation_key = self._attr_key
-        self._attr_unique_id = f"{coordinator.unique_id}_{self._attr_key}_{self._pfrw_index}"
+        self._attr_unique_id = f"{coordinator.unique_id}_{self._attr_translation_key}_{self._pfrw_index}"
         self._attr_device_info = coordinator.device_info
         self._attr_translation_placeholders = {"pfrw_name": f"{self._pfrw_name}"}
 

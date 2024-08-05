@@ -124,6 +124,9 @@
         },
         "port_forwarding": {
           "name": "PortFrw {pfrw_name}"
+        },
+        "web_configurator_access": {
+          "name": "Web Configurator Access"
         }
       }
     }
