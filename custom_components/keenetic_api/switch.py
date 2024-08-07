@@ -38,11 +38,16 @@ class KeeneticSwitchEntityDescription(SwitchEntityDescription):
 SWITCH_TYPES: tuple[KeeneticSwitchEntityDescription, ...] = (
     KeeneticSwitchEntityDescription(
         key="web_configurator_access",
-        translation_key="web_configurator_access",
         is_on_func=lambda coordinator: coordinator.data.show_rc_ip_http['security-level'].get('public', False),
         on_func=lambda coordinator: coordinator.router.turn_on_off_web_configurator_access(True),
         off_func=lambda coordinator: coordinator.router.turn_on_off_web_configurator_access(False),
     ),
+    # KeeneticSwitchEntityDescription(
+    #     key="power_usb1",
+    #     is_on_func=lambda coordinator: coordinator.data.show_rc_system_usb[0].get('public', False),
+    #     on_func=lambda coordinator: coordinator.router.turn_on_off_web_configurator_access(True),
+    #     off_func=lambda coordinator: coordinator.router.turn_on_off_web_configurator_access(False),
+    # ),
 )
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback,) -> None:

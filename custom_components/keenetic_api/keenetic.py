@@ -250,8 +250,6 @@ class Router:
 
     async def ip_policy_list(self):
         return await self.api("get", "/rci/ip/policy")
-    # async def ip_hotspot_host_access(self, mac: str, access: str):
-    #     return await self.api("post", "/rci/ip/hotspot/host", f'{"mac": {mac}, "access": {access}}')
 
     async def ip_hotspot_host_policy(self, mac: str, access: str = "permit", policy: str = False):
         data_send = {"mac": mac, "access": access, "policy": policy}
@@ -259,7 +257,6 @@ class Router:
 
     async def turn_on_off_interface(self, interface: str, state: str):
         return await self.api("post", f"/rci/interface/{interface}", {state: "true"})
-        # return await self.api("get", "/rci/interface")
 
     async def turn_on_off_port_forwarding(self, port_forwarding: str, state: bool):
         data_send = [
@@ -278,6 +275,10 @@ class Router:
     async def turn_on_off_web_configurator_access(self, state: bool):
         data_send = {"public": True, "ssl": True} if state else {"private": True}
         return await self.api("post", f"/rci/ip/http/security-level", data_send)
+
+    # async def turn_on_off_usb(self, state: bool, port: int):
+    #     data_send = {"port": port, "power": {"shutdown": not state}}
+    #     return await self.api("post", f"/rci/system/usb", data_send)
 
     def data_parser(self, data):
         new_data = {}

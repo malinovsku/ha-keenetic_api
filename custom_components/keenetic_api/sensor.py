@@ -122,8 +122,11 @@ async def async_setup_entry(
     coordinator = hass.data[DOMAIN][entry.entry_id][COORD_FULL]
     sensors = []
     for description in SENSOR_TYPES:
-        if description.value(coordinator, description.key) is not None:
-            sensors.append(KeeneticRouterSensor(coordinator, description))
+        try:
+            if description.value(coordinator, description.key) is not None:
+                sensors.append(KeeneticRouterSensor(coordinator, description))
+        except Exception as err:
+            _LOGGER.debug(f'async_setup_entry sensor err - {err}')
     async_add_entities(sensors, False)
 
 
