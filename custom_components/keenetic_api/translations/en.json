@@ -127,6 +127,9 @@
         },
         "web_configurator_access": {
           "name": "Web Configurator Access"
+        },
+        "power_usb": {
+          "name": "USB power port {number}"
         }
       }
     }

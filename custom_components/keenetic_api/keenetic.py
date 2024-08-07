@@ -276,9 +276,9 @@ class Router:
         data_send = {"public": True, "ssl": True} if state else {"private": True}
         return await self.api("post", f"/rci/ip/http/security-level", data_send)
 
-    # async def turn_on_off_usb(self, state: bool, port: int):
-    #     data_send = {"port": port, "power": {"shutdown": not state}}
-    #     return await self.api("post", f"/rci/system/usb", data_send)
+    async def turn_on_off_usb(self, state: bool, port: int):
+        data_send = {"port": port, "power": {"shutdown": not state}}
+        return await self.api("post", f"/rci/system/usb", data_send)
 
     def data_parser(self, data):
         new_data = {}
@@ -307,7 +307,7 @@ class Router:
             data_json_send.append({"show": {"rc": {"ip": {"static": {}}}}})
             data_json_send.append({"show": {"rc": {"ip": {"hotspot": {}}}}})
             data_json_send.append({"show": {"rc": {"ip": {"http": {}}}}})
-            # data_json_send.append({"show": {"rc": {"system": {"usb": {}}}}})
+            data_json_send.append({"show": {"rc": {"system": {}}}})
 
         full_info_other = await self.api("post", "/rci/", json=data_json_send)
 
@@ -363,7 +363,7 @@ class Router:
 
             show_rc_ip_http = full_info_other[7]['show']['rc']['ip']['http']
 
-            # show_rc_system_usb = full_info_other[8]['show']['rc']['system']['usb']
+            show_rc_system_usb = full_info_other[8]['show']['rc']['system'].get('usb', [])
 
         return KeeneticFullData(
             show_system,

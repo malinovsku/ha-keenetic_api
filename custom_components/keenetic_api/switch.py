@@ -34,20 +34,22 @@ class KeeneticSwitchEntityDescription(SwitchEntityDescription):
     is_on_func: Callable[[KeeneticRouterCoordinator], bool | None]
     on_func: Callable[[KeeneticRouterCoordinator], None]
     off_func: Callable[[KeeneticRouterCoordinator], None]
+    placeholder: str | None = None
 
 SWITCH_TYPES: tuple[KeeneticSwitchEntityDescription, ...] = (
     KeeneticSwitchEntityDescription(
         key="web_configurator_access",
-        is_on_func=lambda coordinator: coordinator.data.show_rc_ip_http['security-level'].get('public', False),
-        on_func=lambda coordinator: coordinator.router.turn_on_off_web_configurator_access(True),
-        off_func=lambda coordinator: coordinator.router.turn_on_off_web_configurator_access(False),
+        is_on_func=lambda coordinator, label_sw: coordinator.data.show_rc_ip_http['security-level'].get('public', False),
+        on_func=lambda coordinator, label_sw: coordinator.router.turn_on_off_web_configurator_access(True),
+        off_func=lambda coordinator, label_sw: coordinator.router.turn_on_off_web_configurator_access(False),
     ),
-    # KeeneticSwitchEntityDescription(
-    #     key="power_usb1",
-    #     is_on_func=lambda coordinator: coordinator.data.show_rc_system_usb[0].get('public', False),
-    #     on_func=lambda coordinator: coordinator.router.turn_on_off_web_configurator_access(True),
-    #     off_func=lambda coordinator: coordinator.router.turn_on_off_web_configurator_access(False),
-    # ),
+    KeeneticSwitchEntityDescription(
+        key="power_usb",
+        is_on_func=lambda coordinator, label_sw: coordinator.data.show_rc_system_usb[int(label_sw)-1].get('power', False), # ЧЗХ
+        on_func=lambda coordinator, label_sw: coordinator.router.turn_on_off_usb(True, label_sw),
+        off_func=lambda coordinator, label_sw: coordinator.router.turn_on_off_usb(False, label_sw),
+        placeholder="number",
+    ),
 )
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback,) -> None:
@@ -83,7 +85,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                 )
 
         for description in SWITCH_TYPES:
-            switchs.append(KeeneticSwitchEntity(coordinator, description))
+            if description.key == "power_usb":
+                for row in coordinator.data.show_rc_system_usb:
+                    switchs.append(KeeneticSwitchEntity(coordinator, description, row['port']))
+            else:
+                switchs.append(KeeneticSwitchEntity(coordinator, description, description.key))
 
     async_add_entities(switchs)
 
@@ -97,23 +103,29 @@ class KeeneticSwitchEntity(CoordinatorEntity[KeeneticRouterCoordinator], SwitchE
         self,
         coordinator: KeeneticSwitchEntityDescription,
         entity_description: KeeneticSwitchEntityDescription,
+        label_sw,
     ) -> None:
         super().__init__(coordinator)
         self.entity_description = entity_description
+        self._label_sw = label_sw
         self._attr_translation_key = self.entity_description.key
-        self._attr_unique_id = f"{coordinator.unique_id}_{self._attr_translation_key}_{self._attr_translation_key}"
+        self._attr_unique_id = f"{coordinator.unique_id}_{self._attr_translation_key}_{self._label_sw}"
         self._attr_device_info = coordinator.device_info
+        if self.entity_description.placeholder:
+            self._attr_translation_placeholders = {
+                self.entity_description.placeholder: label_sw
+            }
 
     @property
     def is_on(self) -> bool:
-        return bool(self.entity_description.is_on_func(self.coordinator))
+        return bool(self.entity_description.is_on_func(self.coordinator, self._label_sw))
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        await self.entity_description.on_func(self.coordinator)
+        await self.entity_description.on_func(self.coordinator, self._label_sw)
         await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        await self.entity_description.off_func(self.coordinator)
+        await self.entity_description.off_func(self.coordinator, self._label_sw)
         await self.coordinator.async_request_refresh()
 
 

@@ -17,6 +17,13 @@
                     "off": "mdi:web-off",
                     "on": "mdi:web"
                 }
+            },
+            "power_usb": {
+                "default": "mdi:usb-flash-drive",
+                "state": {
+                    "off": "mdi:usb-flash-drive-outline",
+                    "on": "mdi:usb-flash-drive"
+                }
             }
         },
         "sensor": {
