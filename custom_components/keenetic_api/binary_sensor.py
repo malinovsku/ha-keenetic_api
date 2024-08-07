@@ -36,12 +36,12 @@ BINARY_SENSOR_TYPES: dict[str, KeeneticBinarySensorEntityDescription] = {
     "connected_to_router": KeeneticBinarySensorEntityDescription(
         key="connected_to_router",
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
-        value_fn= lambda coordinator, enti: coordinator.last_update_success,
+        value_fn= lambda coordinator, obj_id: coordinator.last_update_success,
     ),
     "connected_to_interface": KeeneticBinarySensorEntityDescription(
         key="connected_to_interface",
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
-        value_fn= lambda coordinator, enti: coordinator.data.show_interface[enti].get('connected', "no") == "yes",
+        value_fn= lambda coordinator, obj_id: coordinator.data.show_interface[obj_id].get('connected', "no") == "yes",
     ),
 }
 
@@ -59,11 +59,13 @@ async def async_setup_entry(
 
     for interface, data_interface in coordinator.data.show_interface.items():
         if interface in coordinator.data.priority_interface:
+            new_name = f"{data_interface['type']} {data_interface.get('description', '')}"
             binary_sensors.append(
                 KeeneticBinarySensorEntity(
                     coordinator,
                     BINARY_SENSOR_TYPES["connected_to_interface"],
                     interface,
+                    new_name,
                 )
             )
 
@@ -79,20 +81,21 @@ class KeeneticBinarySensorEntity(CoordinatorEntity[KeeneticRouterCoordinator], B
         self,
         coordinator: KeeneticRouterCoordinator,
         description: KeeneticBinarySensorEntityDescription,
-        enti = ""
+        obj_id: str,
+        obj_name: str = "",
     ) -> None:
         super().__init__(coordinator)
-        self._enti = enti
+        self._obj_id = obj_id
         self._attr_key = description.key
         self.entity_description = description
         self._attr_device_info = coordinator.device_info
-        self._attr_unique_id = f"{coordinator.unique_id}_{self._attr_key}_{self._enti}"
+        self._attr_unique_id = f"{coordinator.unique_id}_{self._attr_key}_{self._obj_id}"
         self._attr_translation_key = self._attr_key
-        self._attr_translation_placeholders = {"name": f"{self._enti}"}
+        self._attr_translation_placeholders = {"name": f"{obj_name}"}
 
     @property
     def is_on(self) -> bool:
-        return self.entity_description.value_fn(self.coordinator, self._enti)
+        return self.entity_description.value_fn(self.coordinator, self._obj_id)
 
     @property
     def available(self) -> bool:

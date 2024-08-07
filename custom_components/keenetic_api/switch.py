@@ -45,7 +45,7 @@ SWITCH_TYPES: tuple[KeeneticSwitchEntityDescription, ...] = (
     ),
     KeeneticSwitchEntityDescription(
         key="power_usb",
-        is_on_func=lambda coordinator, label_sw: coordinator.data.show_rc_system_usb[int(label_sw)-1].get('power', False), # ЧЗХ
+        is_on_func=lambda coordinator, label_sw: coordinator.data.show_rc_system_usb[int(label_sw)-1].get('power', False) == False, # ЧЗХ
         on_func=lambda coordinator, label_sw: coordinator.router.turn_on_off_usb(True, label_sw),
         off_func=lambda coordinator, label_sw: coordinator.router.turn_on_off_usb(False, label_sw),
         placeholder="number",
@@ -62,15 +62,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
         interfaces = coordinator.data.show_interface
         for interface, data_interface in interfaces.items():
             if ((data_interface.get('usedby', False)
-                        and (interface.startswith('WifiMaster0') 
-                            or interface.startswith('WifiMaster1')))
-                    or interface in coordinator.data.priority_interface
-            ):
+                and (interface.startswith('WifiMaster0') 
+                    or interface.startswith('WifiMaster1')))):
                 switchs.append(
                     KeeneticInterfaceSwitchEntity(
                         coordinator,
                         data_interface,
                         rc_interface[interface].name_interface,
+                    )
+                )
+            elif interface in coordinator.data.priority_interface:
+                new_name = f"{data_interface['type']} {data_interface.get('description', '')}"
+                switchs.append(
+                    KeeneticInterfaceSwitchEntity(
+                        coordinator,
+                        data_interface,
+                        new_name,
                     )
                 )
 
@@ -84,12 +91,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                     )
                 )
 
-        for description in SWITCH_TYPES:
-            if description.key == "power_usb":
-                for row in coordinator.data.show_rc_system_usb:
-                    switchs.append(KeeneticSwitchEntity(coordinator, description, row['port']))
-            else:
-                switchs.append(KeeneticSwitchEntity(coordinator, description, description.key))
+    for description in SWITCH_TYPES:
+        if description.key == "power_usb":
+            for row in coordinator.data.show_rc_system_usb:
+                switchs.append(KeeneticSwitchEntity(coordinator, description, row['port']))
+        else:
+            switchs.append(KeeneticSwitchEntity(coordinator, description, description.key))
 
     async_add_entities(switchs)
 
