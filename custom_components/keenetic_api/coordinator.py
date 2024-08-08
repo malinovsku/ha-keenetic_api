@@ -3,6 +3,7 @@
 from __future__ import annotations
 from datetime import timedelta
 import logging
+import asyncio
 
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator, 
@@ -18,7 +19,7 @@ from .const import (
     FW_SANDBOX,
     COORD_FIREWARE,
     SCAN_INTERVAL_FIREWARE,
-    FAST_SCAN_INTERVAL_FIREWARE,
+    COUNT_REPEATED_REQUEST_FIREWARE,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -45,23 +46,20 @@ class KeeneticRouterCoordinator(DataUpdateCoordinator):
 
     async def _async_update_data(self):
         """Asynchronous update of all data."""
+        _errr = None
         try:
             full_data = await self.router.custom_request()
         except Exception as err:
             _LOGGER.debug(f"{self.router.mac} UpdateFailed _async_update_data (err {err})")
-            coordinator_firmware = self.hass.data[DOMAIN][self.entry.entry_id][COORD_FIREWARE]
-            coordinator_firmware.update_interval = timedelta(seconds=FAST_SCAN_INTERVAL_FIREWARE)
-            try:
-                await coordinator_firmware.async_refresh()
-            except Exception:
-                pass
-            raise UpdateFailed(f"{self.router.mac} UpdateFailed {err}")
+            _errr = err
         try:
             coordinator_firmware = self.hass.data[DOMAIN][self.entry.entry_id][COORD_FIREWARE]
-            if not coordinator_firmware.last_update_success:
+            if (not coordinator_firmware.last_update_success) or _errr != None:
                 await coordinator_firmware.async_refresh()
         except Exception:
                 pass
+        if _errr != None:
+            raise UpdateFailed(f"{self.router.mac} UpdateFailed (err {_errr})")
         return full_data
 
     @property
@@ -99,24 +97,34 @@ class KeeneticRouterFirmwareCoordinator(DataUpdateCoordinator):
         )
 
     async def _async_update_data(self):
+        repeat=0
+        while repeat < COUNT_REPEATED_REQUEST_FIREWARE:
+            repeat += 1
+            data_components_list = await self.router.components_list()
+            if not data_components_list.get('continued', False):
+                break
+            _LOGGER.debug(f"{self.router.mac} data_components_list not data {data_components_list}")
+            await asyncio.sleep(TIMER_REPEATED_REQUEST_FIREWARE)
         firmware = {}
-        data_components_list = await self.router.components_list()
         firmware['new'] = data_components_list.get('firmware')
         firmware['current'] = data_components_list.get('local')
         firmware['sandbox'] = data_components_list.get('sandbox')
-        if firmware.get("new") == None:
-            raise UpdateFailed(f"{self.router.mac} UpdateFailed not _version_firmware ")
         if (
             self._version_firmware == {} 
             or self._version_firmware.get("new").get("version") != firmware.get("new").get("version") 
             or self._version_firmware.get("current").get("version") != firmware.get("current").get("version")
         ):
-            data_release_notes = await self.router.release_notes(firmware['new']['version'], FW_SANDBOX[firmware['sandbox']])
+            repeat=0
+            while repeat < COUNT_REPEATED_REQUEST_FIREWARE:
+                repeat += 1
+                data_release_notes = await self.router.release_notes(firmware['new']['version'], FW_SANDBOX[firmware['sandbox']])
+                if not data_release_notes.get('continued', False):
+                    break
+                _LOGGER.debug(f"{self.router.mac} data_release_notes not data {data_release_notes}")
+                await asyncio.sleep(TIMER_REPEATED_REQUEST_FIREWARE)
             firmware['release_notes'] = data_release_notes['webhelp']['ru'][0]['href']
             firmware['channel'] = data_release_notes['webhelp']['ru'][0]['title']
             self._version_firmware = firmware
-        if self._version_firmware == {}:
-            raise UpdateFailed(f"{self.router.mac} UpdateFailed not _version_firmware ")
         return self._version_firmware
 
     @property

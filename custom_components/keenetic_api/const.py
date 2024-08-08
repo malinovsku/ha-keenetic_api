@@ -8,7 +8,6 @@ MIN_SCAN_INTERVAL: Final = 1
 DEFAULT_SCAN_INTERVAL: Final = 30
 REQUEST_TIMEOUT: Final = 30
 SCAN_INTERVAL_FIREWARE: Final = 1800
-FAST_SCAN_INTERVAL_FIREWARE: Final = 15
 
 COORD_FULL: Final = "coordinator_full"
 COORD_FIREWARE: Final = "coordinator_firmware"
@@ -34,3 +33,6 @@ POLICY_NOT_INTERNET: Final = "not_internet"
 CROUTER: Final = "client_router"
 
 DEFAULT_BACKUP_TYPE_FILE: Final = ["config"]
+
+COUNT_REPEATED_REQUEST_FIREWARE: Final = 15
+TIMER_REPEATED_REQUEST_FIREWARE: Final = 0.3

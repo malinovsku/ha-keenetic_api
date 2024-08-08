@@ -21,7 +21,6 @@ from homeassistant.exceptions import HomeAssistantError
 from .const import (
     DOMAIN, 
     COORD_FIREWARE, 
-    FAST_SCAN_INTERVAL_FIREWARE, 
     SCAN_INTERVAL_FIREWARE,
     DEFAULT_BACKUP_TYPE_FILE,
     CONF_BACKUP_TYPE_FILE,
@@ -89,16 +88,6 @@ class KeeneticUpdateEntity(CoordinatorEntity[KeeneticRouterFirmwareCoordinator],
     def release_url(self) -> str | None:
         """Release summary."""
         return self.coordinator.data.get("release_notes")
-
-    @property
-    def available(self) -> bool:
-        """Return if update is available."""
-        if super().available:
-            self.coordinator.update_interval = timedelta(seconds=SCAN_INTERVAL_FIREWARE)
-        else:
-            self._in_progress_old_version = None
-            self.coordinator.update_interval = timedelta(seconds=FAST_SCAN_INTERVAL_FIREWARE)
-        return super().available
 
     async def async_install(self, version: str | None, backup: bool, **kwargs: Any) -> None:
         """Install the latest firmware version."""

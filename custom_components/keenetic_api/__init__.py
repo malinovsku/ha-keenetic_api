@@ -45,7 +45,6 @@ from .const import (
     COORD_RC_INTERFACE,
     REQUEST_TIMEOUT,
     SCAN_INTERVAL_FIREWARE,
-    FAST_SCAN_INTERVAL_FIREWARE,
     CROUTER,
     CONF_CREATE_DT,
     CONF_CREATE_ALL_CLIENTS_POLICY,
@@ -77,11 +76,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator_full = KeeneticRouterCoordinator(hass, client, entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL), entry)
     await coordinator_full.async_config_entry_first_refresh()
 
-    coordinator_firmware = KeeneticRouterFirmwareCoordinator(hass, client, FAST_SCAN_INTERVAL_FIREWARE, entry)
-    try:
-        await coordinator_firmware.async_config_entry_first_refresh()
-    except Exception as err:
-        _LOGGER.debug(f'coordinator_firmware error - {err}')
+    coordinator_firmware = KeeneticRouterFirmwareCoordinator(hass, client, SCAN_INTERVAL_FIREWARE, entry)
+    await coordinator_firmware.async_refresh()
 
     if client.hw_type == "router":
         coordinator_rc_interface = KeeneticRouterRcInterfaceCoordinator(hass, client, SCAN_INTERVAL_FIREWARE, entry)
