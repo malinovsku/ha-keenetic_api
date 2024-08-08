@@ -20,6 +20,7 @@ from .const import (
     COORD_FIREWARE,
     SCAN_INTERVAL_FIREWARE,
     COUNT_REPEATED_REQUEST_FIREWARE,
+    TIMER_REPEATED_REQUEST_FIREWARE,
 )
 
 _LOGGER = logging.getLogger(__name__)

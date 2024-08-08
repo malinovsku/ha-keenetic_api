@@ -166,12 +166,12 @@ class KeeneticInterfaceSwitchEntity(CoordinatorEntity[KeeneticRouterCoordinator]
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn on."""
-        await self.coordinator.router.turn_on_off_interface(self._id_interface, 'up'),
+        await self.coordinator.router.turn_on_off_interface(self._id_interface, 'up')
         await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn off."""
-        await self.coordinator.router.turn_on_off_interface(self._id_interface, 'down'),
+        await self.coordinator.router.turn_on_off_interface(self._id_interface, 'down')
         await self.coordinator.async_request_refresh()
 
     @property
