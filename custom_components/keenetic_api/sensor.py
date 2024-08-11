@@ -18,8 +18,11 @@ from homeassistant.const import (
     EntityCategory, 
     UnitOfDataRate,
     UnitOfTemperature,
+    UnitOfInformation,
+    UnitOfTime,
 )
-
+from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers import device_registry as dr
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -45,9 +48,13 @@ class KeeneticRouterSensorEntityDescription(SensorEntityDescription):
     attributes_fn: Callable[[KeeneticFullData], dict[str, Any]] | None = None
 
 
-def convert_uptime(uptime: str) -> datetime:
+def convert_uptime(uptime: int) -> datetime:
     """Convert uptime."""
     return (datetime.now(tz=UTC) - timedelta(seconds=int(uptime))).replace(second=0, microsecond=0)
+
+def convert_data_size(data_size: int) -> float:
+    """Convert data_size."""
+    return round(data_size/1024/1024, 4)
 
 def ind_wan_ip_adress(fdata: KeeneticFullData):
     """Определение внешнего IP адреса."""
@@ -113,6 +120,37 @@ SENSOR_TYPES: tuple[KeeneticRouterSensorEntityDescription, ...] = (
     ),
 )
 
+SENSORS_STAT_INTERFACE: tuple[KeeneticRouterSensorEntityDescription, ...] = (
+    KeeneticRouterSensorEntityDescription(
+        key="rxbytes",
+        state_class=SensorDeviceClass.DATA_SIZE,
+        native_unit_of_measurement=UnitOfInformation.MEGABYTES,
+        value=lambda coordinator, obj_id: convert_data_size(coordinator.data.stat_interface[obj_id].get('rxbytes')),
+    ),
+    KeeneticRouterSensorEntityDescription(
+        key="txbytes",
+        state_class=SensorDeviceClass.DATA_SIZE,
+        native_unit_of_measurement=UnitOfInformation.MEGABYTES,
+        value=lambda coordinator, obj_id: convert_data_size(coordinator.data.stat_interface[obj_id].get('txbytes')),
+    ),
+    KeeneticRouterSensorEntityDescription(
+        key="timestamp",
+        device_class=SensorDeviceClass.TIMESTAMP,
+        value=lambda coordinator, obj_id: convert_uptime(coordinator.data.show_interface[obj_id].get('uptime')),
+    ),
+    KeeneticRouterSensorEntityDescription(
+        key="rxspeed",
+        device_class=SensorDeviceClass.DATA_RATE,
+        native_unit_of_measurement=UnitOfDataRate.BITS_PER_SECOND,
+        value=lambda coordinator, obj_id: coordinator.data.stat_interface[obj_id].get('rxspeed'),
+    ),
+    KeeneticRouterSensorEntityDescription(
+        key="txspeed",
+        device_class=SensorDeviceClass.DATA_RATE,
+        native_unit_of_measurement=UnitOfDataRate.BITS_PER_SECOND,
+        value=lambda coordinator, obj_id: coordinator.data.stat_interface[obj_id].get('txspeed'),
+    ),
+)
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -120,15 +158,32 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback
 ) -> None:
     coordinator = hass.data[DOMAIN][entry.entry_id][COORD_FULL]
+
+    # Временно на пару версий, удалить сенсоры со старым unique_id от дублирования
+    entity_registry = er.async_get(hass)
+    entity_conf = er.async_entries_for_config_entry(entity_registry, entry.entry_id)
+    for entity in entity_conf:
+        if entity.domain == "sensor":
+            for description in SENSOR_TYPES:
+                if entity.unique_id == f"{coordinator.unique_id}_{description.key}":
+                    entity_registry.async_remove(entity.entity_id)
+
+
     sensors = []
     for description in SENSOR_TYPES:
         try:
             if description.value(coordinator, description.key) is not None:
-                sensors.append(KeeneticRouterSensor(coordinator, description))
+                sensors.append(KeeneticRouterSensor(coordinator, description, description.key, description.key))
         except Exception as err:
             _LOGGER.debug(f'async_setup_entry sensor err - {err}')
-    async_add_entities(sensors, False)
 
+    for interface, data_interface in coordinator.data.show_interface.items():
+        if interface in coordinator.data.priority_interface:
+            new_name = f"{data_interface['type']} {data_interface.get('description', '')}"
+            for description in SENSORS_STAT_INTERFACE:
+                sensors.append(KeeneticRouterSensor(coordinator, description, interface, new_name))
+
+    async_add_entities(sensors, False)
 
 class KeeneticRouterSensor(CoordinatorEntity[KeeneticRouterCoordinator], SensorEntity):
     _attr_has_entity_name = True
@@ -138,18 +193,22 @@ class KeeneticRouterSensor(CoordinatorEntity[KeeneticRouterCoordinator], SensorE
             self,
             coordinator: KeeneticRouterCoordinator,
             description: KeeneticRouterSensorEntityDescription,
+            obj_id: str,
+            obj_name: str,
     ) -> None:
         super().__init__(coordinator)
 
         self._attr_device_info = coordinator.device_info
-        self._attr_unique_id = f"{coordinator.unique_id}_{description.key}"
+        self.obj_id = obj_id
+        self._attr_unique_id = f"{coordinator.unique_id}_{description.key}_{self.obj_id}"
         self.entity_description = description
         self._attr_translation_key = description.key
+        self._attr_translation_placeholders = {"name": f"{obj_name}"}
 
     @property
     def native_value(self) -> StateType:
         """Sensor value."""
-        return self.entity_description.value(self.coordinator, self.entity_description.key)
+        return self.entity_description.value(self.coordinator, self.obj_id)
 
     @property
     def extra_state_attributes(self) -> dict[str, str] | None:

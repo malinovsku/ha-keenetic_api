@@ -25,6 +25,7 @@ class KeeneticFullData:
     show_rc_ip_http: dict[str, Any]
     show_rc_system_usb: dict[str, Any]
     show_media: dict[str, Any]
+    stat_interface: dict[str, Any]
 
 @dataclass
 class DataDevice():
@@ -84,6 +85,7 @@ class Router:
         self.url_router = f'{host}:{port}'
         self._username = username
         self._password = password
+        self.request_interface = []
 
         self._mac = ""
         self._serial_number = ""
@@ -126,6 +128,12 @@ class Router:
 
         data_show_system_mode = await self.show_system_mode()
         self._hw_type = data_show_system_mode["active"]
+
+        data_show_rc_interface_ip_global = await self.show_rc_interface_ip_global()
+        for row in data_show_rc_interface_ip_global:
+            self.request_interface.append(row)
+
+        return True
 
 
     async def async_download_file(self, download_url, folder):
@@ -194,7 +202,7 @@ class Router:
     async def async_backup(self, folder: str, type_fw: list = ["firmware", "config"]):
         if "firmware" in type_fw:
             await self.async_download_file(f"{self.url_router}/ci/firmware", folder)
-        if "config" in type_fw:
+        elif "config" in type_fw:
             await self.async_download_file(f"{self.url_router}/ci/startup-config", folder)
         return True
 
@@ -246,6 +254,9 @@ class Router:
     async def show_interface_stat(self, interface: str):
         return await self.api("get", f"/rci/show/interface/stat?name={interface}")
 
+    async def show_rc_interface_ip_global(self):
+        return await self.api("get", f"/rci/show/rc/interface/ip/global")
+
     async def ip_hotspot_host_list(self):
         return await self.api("get", "/rci/ip/hotspot/host")
 
@@ -295,6 +306,17 @@ class Router:
                 new_data[nu] = te
         return new_data
 
+    async def show_stat_interface(self, stat_interfaces: list = None):
+        stat_interfaces = stat_interfaces or self.request_interface
+        data_json_send=[]
+        for row in stat_interfaces:
+            data_json_send.append({"show": {"interface": {"stat": {"name": row}}}})
+        data_show_stat_interface = await self.api("post", "/rci/", json=data_json_send)
+        # _LOGGER.debug(f"{self._mac} data_show_stat_interface {data_show_stat_interface} ")
+        stat_interface={}
+        for idx, row in enumerate(stat_interfaces):
+            stat_interface[row] = data_show_stat_interface[idx]['show']['interface']['stat']
+        return stat_interface
 
     async def custom_request(self):
         data_json_send=[]
@@ -365,6 +387,8 @@ class Router:
             for hotspot_pl in data_show_ip_hotspot_policy:
                 show_ip_hotspot_policy[hotspot_pl["mac"]] = hotspot_pl
 
+        stat_interface = await self.show_stat_interface()
+
         return KeeneticFullData(
             show_system,
             show_ip_hotspot, 
@@ -376,4 +400,5 @@ class Router:
             show_rc_ip_http,
             show_rc_system_usb,
             show_media,
+            stat_interface,
             )

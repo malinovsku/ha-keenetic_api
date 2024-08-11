@@ -38,6 +38,18 @@
             },
             "wan_ip_adress": {
                 "default": "mdi:ip-network"
+            },
+            "rxbytes": {
+                "default": "mdi:database-import"
+            },
+            "txbytes": {
+                "default": "mdi:database-export"
+            },
+            "rxspeed": {
+                "default": "mdi:download-network"
+            },
+            "txspeed": {
+                "default": "mdi:upload-network"
             }
         },
         "binary_sensor": {

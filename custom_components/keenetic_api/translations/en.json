@@ -106,6 +106,21 @@
         },
         "wan_ip_adress": {
           "name": "WAN IP adress"
+        },
+        "rxbytes": {
+          "name": "{name} rxbytes"
+        },
+        "txbytes": {
+          "name": "{name} txbytes"
+        },
+        "timestamp": {
+          "name": "{name} rxbytes"
+        },
+        "rxspeed": {
+          "name": "{name} rxspeed"
+        },
+        "txspeed": {
+          "name": "{name} txspeed"
         }
       },
       "image": {
