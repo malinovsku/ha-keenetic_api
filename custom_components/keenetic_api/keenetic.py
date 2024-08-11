@@ -24,6 +24,7 @@ class KeeneticFullData:
     priority_interface: dict[str, Any]
     show_rc_ip_http: dict[str, Any]
     show_rc_system_usb: dict[str, Any]
+    show_media: dict[str, Any]
 
 @dataclass
 class DataDevice():
@@ -302,6 +303,7 @@ class Router:
         data_json_send.append({"show": {"associations": {}}})
         data_json_send.append({"show": {"rc": {"system": {}}}})
         data_json_send.append({"show": {"rc": {"ip": {"http": {}}}}})
+        data_json_send.append({"show": {"media": {}}})
 
         if self.hw_type == "router":
             data_json_send.append({"show": {"ip": {"hotspot": {}}}})
@@ -317,6 +319,7 @@ class Router:
         show_associations = full_info_other[2]['show']['associations']
         show_rc_system_usb = full_info_other[3]['show']['rc']['system'].get('usb', [])
         show_rc_ip_http = full_info_other[4]['show']['rc']['ip']['http']
+        show_media = full_info_other[5]['show']['media']
 
         show_ip_hotspot = {}
         show_rc_ip_static = {}
@@ -325,7 +328,7 @@ class Router:
 
 
         if self.hw_type == "router":
-            data_show_ip_hotspot = full_info_other[5]['show']['ip']['hotspot']['host']
+            data_show_ip_hotspot = full_info_other[6]['show']['ip']['hotspot']['host']
             for hotspot in data_show_ip_hotspot:
                 show_ip_hotspot[hotspot["mac"]] = DataDevice(
                     hotspot.get('mac'), 
@@ -340,9 +343,9 @@ class Router:
                     hotspot.get('txbytes'), 
                 )
             
-            priority_interface = full_info_other[6]['show']['rc']['interface']['ip']['global']
+            priority_interface = full_info_other[7]['show']['rc']['interface']['ip']['global']
 
-            data_show_rc_ip_static = full_info_other[7]['show']['rc']['ip']['static']
+            data_show_rc_ip_static = full_info_other[8]['show']['rc']['ip']['static']
             for port_frw in data_show_rc_ip_static:
                 nm_pfrw = port_frw.get('comment', port_frw.get('index'))
                 nm_pfrw = nm_pfrw if nm_pfrw != "" else port_frw.get('index')
@@ -358,7 +361,7 @@ class Router:
                     port_frw.get('disable', False), 
                 )
 
-            data_show_ip_hotspot_policy = full_info_other[8]['show']['rc']['ip']['hotspot']['host']
+            data_show_ip_hotspot_policy = full_info_other[9]['show']['rc']['ip']['hotspot']['host']
             for hotspot_pl in data_show_ip_hotspot_policy:
                 show_ip_hotspot_policy[hotspot_pl["mac"]] = hotspot_pl
 
@@ -372,4 +375,5 @@ class Router:
             priority_interface,
             show_rc_ip_http,
             show_rc_system_usb,
+            show_media,
             )

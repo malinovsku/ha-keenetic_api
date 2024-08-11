@@ -29,16 +29,25 @@
         "sensor": {
             "clients_wifi": {
                 "default": "mdi:sitemap-outline"
-                },
+            },
             "memory": {
                 "default": "mdi:memory"
-                },
+            },
             "cpuload": {
                 "default": "mdi:cpu-32-bit"
-                },
+            },
             "wan_ip_adress": {
                 "default": "mdi:ip-network"
+            }
+        },
+        "binary_sensor": {
+            "connected_to_media": {
+                "default": "mdi:play-network",
+                "state": {
+                    "off": "mdi:play-network-outline",
+                    "on": "mdi:play-network"
                 }
+            }
         }
     },
     "services": {

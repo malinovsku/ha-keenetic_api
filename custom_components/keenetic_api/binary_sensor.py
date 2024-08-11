@@ -30,6 +30,7 @@ _LOGGER = logging.getLogger(__name__)
 class KeeneticBinarySensorEntityDescription(BinarySensorEntityDescription):
     """Describes Keenetic sensor entity."""
     value_fn: Callable[[KeeneticRouterCoordinator], bool]
+    attributes_fn: Callable[[KeeneticRouterCoordinator], bool] | None = None
 
 
 BINARY_SENSOR_TYPES: dict[str, KeeneticBinarySensorEntityDescription] = {
@@ -43,7 +44,17 @@ BINARY_SENSOR_TYPES: dict[str, KeeneticBinarySensorEntityDescription] = {
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
         value_fn= lambda coordinator, obj_id: coordinator.data.show_interface[obj_id].get('connected', "no") == "yes",
     ),
+    "connected_to_media": KeeneticBinarySensorEntityDescription(
+        key="connected_to_media",
+        device_class=BinarySensorDeviceClass.CONNECTIVITY,
+        value_fn= lambda coordinator, obj_id: coordinator.data.show_media.get(obj_id, False),
+        attributes_fn=lambda coordinator, obj_id: {
+            "media": coordinator.data.show_media.get(obj_id, None),
+        },
+    ),
 }
+
+
 
 
 async def async_setup_entry(
@@ -68,6 +79,10 @@ async def async_setup_entry(
                     new_name,
                 )
             )
+
+    for usb in coordinator.data.show_rc_system_usb:
+        name_media = f"Media{int(usb['port'])-1}"
+        binary_sensors.append(KeeneticBinarySensorEntity(coordinator, BINARY_SENSOR_TYPES["connected_to_media"], name_media, name_media))
 
     async_add_entities(binary_sensors, False)
 
@@ -103,3 +118,10 @@ class KeeneticBinarySensorEntity(CoordinatorEntity[KeeneticRouterCoordinator], B
             return True
         else:
             return self.coordinator.last_update_success
+
+    @property
+    def extra_state_attributes(self) -> dict[str, str] | None:
+        if self.entity_description.attributes_fn is not None:
+            return self.entity_description.attributes_fn(self.coordinator, self._obj_id)
+        else:
+            return None

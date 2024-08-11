@@ -116,6 +116,9 @@
       "binary_sensor": {
         "connected_to_interface": {
           "name": "{name} Connected"
+        },
+        "connected_to_media": {
+          "name": "{name}"
         }
       },
       "switch": {
