@@ -26,11 +26,12 @@
           "description": "Дополнительные настройки.",
           "data": {
             "scan_interval": "Интервал скарирования (секунд).",
-            "create_image_qr": "Создать объекты Image QG WiFi.",
-            "create_entity_all_cliens_button_policy": "Создать объекты Select политик для всех устройств.",
-            "cliens_select_policy": "Создать объекты Select политик по выбранным устройствам.",
-            "create_device_tracker": "Создать объекты device_tracker по всем устройствам.",
-            "create_entity_port_forwarding": "Создать объекты Switch по всем port forwarding.",
+            "create_image_qr": "Создать Image QG WiFi.",
+            "create_entity_all_cliens_button_policy": "Создать Select политик для всех устройств.",
+            "cliens_select_policy": "Создать Select политик по выбранным устройствам.",
+            "create_device_tracker": "Создать Device tracker по всем устройствам.",
+            "create_select_device_tracker": "Создать Device tracker по выбранным устройствам.",
+            "create_entity_port_forwarding": "Создать Switch по всем port forwarding.",
             "backup_type_file": "Файлы бекапа для скачивания при обновлении."
           }
         },

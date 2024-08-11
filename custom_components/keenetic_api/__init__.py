@@ -51,6 +51,7 @@ from .const import (
     CONF_CLIENTS_SELECT_POLICY,
     CONF_CREATE_PORT_FRW,
     CONF_CREATE_IMAGE_QR,
+    CONF_SELECT_CREATE_DT,
 )
 
 PLATFORMS: list[Platform] = [
@@ -162,26 +163,27 @@ def remove_entities_or_devices(hass, entry) -> None:
     for entity in entity_conf:
         delete_ent = False
         if (
-            entity.domain == "device_tracker"
-            and not entry.options.get(CONF_CREATE_DT, True) 
+            entity.domain == "device_tracker" 
+            and not entry.options.get(CONF_CREATE_DT, False) 
+            and hass.states.get(entity.entity_id).attributes.get("mac") not in entry.options.get(CONF_SELECT_CREATE_DT, []) 
         ):
             delete_ent = True
         elif (
             entity.domain == "switch" 
             and entity.translation_key == "port_forwarding"
-            and not entry.options.get(CONF_CREATE_PORT_FRW, True) 
+            and not entry.options.get(CONF_CREATE_PORT_FRW, False) 
         ):
             delete_ent = True
         elif (
             entity.domain == "image" 
             and entity.translation_key == "qrwifi"
-            and not entry.options.get(CONF_CREATE_IMAGE_QR, True) 
+            and not entry.options.get(CONF_CREATE_IMAGE_QR, False) 
         ):
             delete_ent = True
         elif (
             entity.domain == "select" 
             and entity.translation_key == "client_policy"
-            and not entry.options.get(CONF_CREATE_ALL_CLIENTS_POLICY, True) 
+            and not entry.options.get(CONF_CREATE_ALL_CLIENTS_POLICY, False) 
             and hass.states.get(entity.entity_id).attributes.get("mac") not in entry.options.get(CONF_CLIENTS_SELECT_POLICY, []) 
         ):
             delete_ent = True

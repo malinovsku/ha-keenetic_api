@@ -37,6 +37,7 @@ from .const import (
     CONF_CREATE_PORT_FRW,
     DEFAULT_BACKUP_TYPE_FILE,
     CONF_BACKUP_TYPE_FILE,
+    CONF_SELECT_CREATE_DT,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -118,9 +119,16 @@ class OptionsFlow(config_entries.OptionsFlow):
             client['mac']: f"{client['name'] or client['hostname']} ({client['mac']})"
             for client in data_clients
         }
-        clients |= {
+        clients_policy = clients
+        clients_policy |= {
             mac: f"Unknown ({mac})"
             for mac in self._options.get(CONF_CLIENTS_SELECT_POLICY, [])
+            if mac not in clients
+        }
+        clients_dt = clients
+        clients_dt |= {
+            mac: f"Unknown ({mac})"
+            for mac in self._options.get(CONF_SELECT_CREATE_DT, [])
             if mac not in clients
         }
 
@@ -150,7 +158,7 @@ class OptionsFlow(config_entries.OptionsFlow):
                         CONF_CLIENTS_SELECT_POLICY,
                         default=self._options.get(CONF_CLIENTS_SELECT_POLICY, []),
                     ): cv.multi_select(
-                        dict(sorted(clients.items(), key=operator.itemgetter(1)))
+                        dict(sorted(clients_policy.items(), key=operator.itemgetter(1)))
                     ),
                     vol.Optional(
                         CONF_CREATE_DT,
@@ -158,6 +166,12 @@ class OptionsFlow(config_entries.OptionsFlow):
                             CONF_CREATE_DT, False
                         ),
                     ): bool,
+                    vol.Optional(
+                        CONF_SELECT_CREATE_DT,
+                        default=self._options.get(CONF_SELECT_CREATE_DT, []),
+                    ): cv.multi_select(
+                        dict(sorted(clients_dt.items(), key=operator.itemgetter(1)))
+                    ),
                     vol.Optional(
                         CONF_CREATE_PORT_FRW,
                         default=self._options.get(

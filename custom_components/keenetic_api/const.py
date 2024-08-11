@@ -20,6 +20,7 @@ CONF_CREATE_PORT_FRW: Final = "create_entity_port_forwarding"
 CONF_BACKUP_TYPE_FILE: Final = "backup_type_file"
 
 CONF_CREATE_DT: Final = "create_device_tracker"
+CONF_SELECT_CREATE_DT: Final = "create_select_device_tracker"
 
 FW_SANDBOX: Final = {
     "stable": "main",

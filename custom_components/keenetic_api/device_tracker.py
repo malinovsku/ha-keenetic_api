@@ -18,6 +18,7 @@ from .const import (
     DOMAIN,
     COORD_FULL,
     CONF_CREATE_DT,
+    CONF_SELECT_CREATE_DT,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -33,17 +34,17 @@ async def async_setup_entry(
 
     @callback
     def async_update_router() -> None:
-        new_device: list[KeeneticScannerEntity] = []
-        if entry.options.get(CONF_CREATE_DT):
-            for mac, device in coordinator.data.show_ip_hotspot.items():
+        device_trackers: list[KeeneticScannerEntity] = []
+        for mac, device in coordinator.data.show_ip_hotspot.items():
+            if mac in entry.options.get(CONF_SELECT_CREATE_DT, []) or entry.options.get(CONF_CREATE_DT, False):
                 if mac not in tracked:
                     tracked[mac] = KeeneticScannerEntity(
                         coordinator, 
                         mac, 
                         device.name or device.hostname or device.mac,
                     )
-                    new_device.append(tracked[mac])
-        async_add_entities(new_device)
+                    device_trackers.append(tracked[mac])
+        async_add_entities(device_trackers)
 
     entry.async_on_unload(coordinator.async_add_listener(async_update_router))
     async_update_router()
