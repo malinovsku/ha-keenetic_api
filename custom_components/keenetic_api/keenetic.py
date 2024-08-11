@@ -252,8 +252,8 @@ class Router:
     async def ip_policy_list(self):
         return await self.api("get", "/rci/ip/policy")
 
-    async def ip_hotspot_host_policy(self, mac: str, access: str = "permit", policy: str = False):
-        data_send = {"mac": mac, "access": access, "policy": policy}
+    async def ip_hotspot_host_policy(self, mac: str, access: str = "permit", policy: str = {"no": True}):
+        data_send = {"mac": mac, access: True, "policy": policy}
         return await self.api("post", "/rci/ip/hotspot/host", data_send)
 
     async def turn_on_off_interface(self, interface: str, state: str):

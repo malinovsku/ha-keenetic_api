@@ -96,10 +96,10 @@ class KeeneticPolicySelectEntity(CoordinatorEntity[KeeneticRouterCoordinator], S
             return None
 
     async def async_select_option(self, option: str) -> None:
-        policy = False
+        policy = {"no": True}
         if option == POLICY_NOT_INTERNET:
             new_option = "deny"
-        if option == POLICY_DEFAULT:
+        elif option == POLICY_DEFAULT:
             new_option = "permit"
         else:
             new_option = "permit"
