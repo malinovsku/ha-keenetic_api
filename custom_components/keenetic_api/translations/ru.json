@@ -151,7 +151,7 @@
         "name": "PortFrw {pfrw_name}"
       },
       "web_configurator_access": {
-        "name": "Доступ к Web Интерфесу"
+        "name": "Доступ к Web Интерфейсу"
       },
       "power_usb": {
         "name": "Питание USB порта {number}"
