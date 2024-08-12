@@ -96,7 +96,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
             for row in coordinator.data.show_rc_system_usb:
                 switchs.append(KeeneticSwitchEntity(coordinator, description, row['port']))
         else:
-            switchs.append(KeeneticSwitchEntity(coordinator, description, description.key))
+            if coordinator.router.hw_type == "router":
+                switchs.append(KeeneticSwitchEntity(coordinator, description, description.key))
 
     async_add_entities(switchs)
 
