@@ -162,16 +162,6 @@ async def async_setup_entry(
 ) -> None:
     coordinator = hass.data[DOMAIN][entry.entry_id][COORD_FULL]
 
-    # Временно на пару версий, удалить сенсоры со старым unique_id от дублирования
-    entity_registry = er.async_get(hass)
-    entity_conf = er.async_entries_for_config_entry(entity_registry, entry.entry_id)
-    for entity in entity_conf:
-        if entity.domain == "sensor":
-            for description in SENSOR_TYPES:
-                if entity.unique_id == f"{coordinator.unique_id}_{description.key}":
-                    entity_registry.async_remove(entity.entity_id)
-
-
     sensors = []
     for description in SENSOR_TYPES:
         try:
