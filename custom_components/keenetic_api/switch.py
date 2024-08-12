@@ -142,10 +142,6 @@ class KeeneticInterfaceSwitchEntity(CoordinatorEntity[KeeneticRouterCoordinator]
     _attr_translation_key="interface"
     _attr_has_entity_name = True
 
-    _unrecorded_attributes = frozenset({
-        "uptime"
-    })
-
     def __init__(
         self,
         coordinator: KeeneticRouterCoordinator,
@@ -180,7 +176,6 @@ class KeeneticInterfaceSwitchEntity(CoordinatorEntity[KeeneticRouterCoordinator]
         """Return the state attributes."""
         return {
             "interface_type": self._id_interface,
-            "uptime": self.coordinator.data.show_interface[self._id_interface].get('uptime'),
         }
 
 
