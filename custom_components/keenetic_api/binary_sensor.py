@@ -37,6 +37,7 @@ BINARY_SENSOR_TYPES: dict[str, KeeneticBinarySensorEntityDescription] = {
     "connected_to_router": KeeneticBinarySensorEntityDescription(
         key="connected_to_router",
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
+        entity_category=EntityCategory.DIAGNOSTIC,
         value_fn= lambda coordinator, obj_id: coordinator.last_update_success,
     ),
     "connected_to_interface": KeeneticBinarySensorEntityDescription(
@@ -66,11 +67,11 @@ async def async_setup_entry(
     coordinator = hass.data[DOMAIN][entry.entry_id][COORD_FULL]
     binary_sensors: list[BinarySensorEntity] = []
 
-    binary_sensors.append(KeeneticBinarySensorEntity(coordinator, BINARY_SENSOR_TYPES["connected_to_router"], "status_router"))
+    binary_sensors.append(KeeneticBinarySensorEntity(coordinator, BINARY_SENSOR_TYPES["connected_to_router"], "connected_to_router", coordinator.router.name_device))
 
     for interface, data_interface in coordinator.data.show_interface.items():
-        if interface in coordinator.data.priority_interface:
-            new_name = f"{data_interface['type']} {data_interface.get('description', '')}"
+        if interface in coordinator.router.request_interface:
+            new_name = coordinator.router.request_interface[interface]
             binary_sensors.append(
                 KeeneticBinarySensorEntity(
                     coordinator,

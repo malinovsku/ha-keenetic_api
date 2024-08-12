@@ -68,7 +68,8 @@ class KeeneticButtonEntity(CoordinatorEntity[KeeneticRouterCoordinator], ButtonE
     ) -> None:
         super().__init__(coordinator)
         self._attr_device_info = coordinator.device_info
-        self._attr_unique_id = f"{coordinator.unique_id}_{description.key}"
+        self._attr_unique_id = f"{coordinator.unique_id}_{description.key}_{description.key}"
+        self._attr_translation_key = description.key
         self.entity_description = description
 
     async def async_press(self) -> None:

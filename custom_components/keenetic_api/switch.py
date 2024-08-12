@@ -71,8 +71,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                         rc_interface[interface].name_interface,
                     )
                 )
-            elif interface in coordinator.data.priority_interface:
-                new_name = f"{data_interface['type']} {data_interface.get('description', '')}"
+            elif interface in coordinator.router.request_interface:
+                new_name = coordinator.router.request_interface[interface]
                 switchs.append(
                     KeeneticInterfaceSwitchEntity(
                         coordinator,

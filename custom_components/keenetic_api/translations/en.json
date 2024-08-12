@@ -91,10 +91,10 @@
           "name": "CPU load"
         },
         "memory": {
-          "name": "Memory load"
+          "name": "Memory used"
         },
         "uptime": {
-          "name": "Uptime"
+          "name": "Start up time"
         },
         "temperature_2_4g": {
           "name": "Temperature 2.4g chip"
@@ -109,19 +109,19 @@
           "name": "WAN IP adress"
         },
         "rxbytes": {
-          "name": "{name} rxbytes"
+          "name": "{name} Downloaded"
         },
         "txbytes": {
-          "name": "{name} txbytes"
+          "name": "{name} Uploaded"
         },
         "timestamp": {
-          "name": "{name} rxbytes"
+          "name": "{name} Start up time"
         },
         "rxspeed": {
-          "name": "{name} rxspeed"
+          "name": "{name} Downlink speed"
         },
         "txspeed": {
-          "name": "{name} txspeed"
+          "name": "{name} Uplink speed"
         }
       },
       "image": {
@@ -129,12 +129,20 @@
           "name": "{name}"
         }
       },
+      "button": {
+        "reboot": {
+          "name": "Reboot"
+        }
+      },
       "binary_sensor": {
+        "connected_to_router": {
+          "name": "Connection to Keenetic {name}"
+        },
         "connected_to_interface": {
-          "name": "{name} Connected"
+          "name": "{name} Connection"
         },
         "connected_to_media": {
-          "name": "{name}"
+          "name": "Status {name}"
         }
       },
       "switch": {

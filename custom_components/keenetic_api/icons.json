@@ -46,10 +46,10 @@
                 "default": "mdi:database-export"
             },
             "rxspeed": {
-                "default": "mdi:download-network"
+                "default": "mdi:upload-network"
             },
             "txspeed": {
-                "default": "mdi:upload-network"
+                "default": "mdi:download-network"
             }
         },
         "binary_sensor": {
