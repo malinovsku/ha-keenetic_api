@@ -50,11 +50,14 @@ class KeeneticRouterSensorEntityDescription(SensorEntityDescription):
 
 def convert_uptime(uptime: int) -> datetime:
     """Convert uptime."""
-    return (datetime.now(tz=UTC) - timedelta(seconds=int(uptime))).replace(second=0, microsecond=0)
+    if uptime != None:
+        return (datetime.now(tz=UTC) - timedelta(seconds=int(uptime))).replace(second=0, microsecond=0)
+    else:
+        return None
 
 def convert_data_size(data_size: int) -> float:
     """Convert data_size."""
-    return round(data_size/1024/1024, 4)
+    return round(data_size/1024/1024, 3)
 
 def ind_wan_ip_adress(fdata: KeeneticFullData):
     """Определение внешнего IP адреса."""
@@ -141,14 +144,14 @@ SENSORS_STAT_INTERFACE: tuple[KeeneticRouterSensorEntityDescription, ...] = (
     KeeneticRouterSensorEntityDescription(
         key="rxspeed",
         device_class=SensorDeviceClass.DATA_RATE,
-        native_unit_of_measurement=UnitOfDataRate.BITS_PER_SECOND,
-        value=lambda coordinator, obj_id: coordinator.data.stat_interface[obj_id].get('rxspeed'),
+        native_unit_of_measurement=UnitOfDataRate.MEGABITS_PER_SECOND,
+        value=lambda coordinator, obj_id: convert_data_size(coordinator.data.stat_interface[obj_id].get('rxspeed')),
     ),
     KeeneticRouterSensorEntityDescription(
         key="txspeed",
         device_class=SensorDeviceClass.DATA_RATE,
-        native_unit_of_measurement=UnitOfDataRate.BITS_PER_SECOND,
-        value=lambda coordinator, obj_id: coordinator.data.stat_interface[obj_id].get('txspeed'),
+        native_unit_of_measurement=UnitOfDataRate.MEGABITS_PER_SECOND,
+        value=lambda coordinator, obj_id: convert_data_size(coordinator.data.stat_interface[obj_id].get('txspeed')),
     ),
 )
 
@@ -175,13 +178,16 @@ async def async_setup_entry(
             if description.value(coordinator, description.key) is not None:
                 sensors.append(KeeneticRouterSensor(coordinator, description, description.key, description.key))
         except Exception as err:
-            _LOGGER.debug(f'async_setup_entry sensor err - {err}')
+            _LOGGER.debug(f'async_setup_entry sensor SENSOR_TYPES {description} err - {err}')
 
     for interface, data_interface in coordinator.data.show_interface.items():
-        if interface in coordinator.data.priority_interface:
-            new_name = f"{data_interface['type']} {data_interface.get('description', '')}"
+        if interface in coordinator.router.request_interface:
+            new_name = coordinator.router.request_interface[interface]
             for description in SENSORS_STAT_INTERFACE:
-                sensors.append(KeeneticRouterSensor(coordinator, description, interface, new_name))
+                try:
+                    sensors.append(KeeneticRouterSensor(coordinator, description, interface, new_name))
+                except Exception as err:
+                    _LOGGER.debug(f'async_setup_entry sensor SENSORS_STAT_INTERFACE {description} err - {err}')
 
     async_add_entities(sensors, False)
 
