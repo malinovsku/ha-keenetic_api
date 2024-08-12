@@ -65,10 +65,23 @@ class DataRcInterface():
 
 
 INTERFACES_WIFI_NAME = {
-    "WifiMaster0": "WiFi 2.4g",
-    "WifiMaster1": "WiFi 5g"
+    "WifiMaster0": "WiFi %s 2.4G",
+    "WifiMaster1": "WiFi %s 5G"
 }
 
+LIST_INTERFACES = [
+    "UsbModem",
+    "Davicom",
+    "UsbLte",
+    "Yota",
+    "PPPoE",
+    "SSTP",
+    "PPTP",
+    "L2TP",
+    "Wireguard",
+    "OpenVPN",
+    "EoIP",
+]
 
 class Router:
     def __init__(
@@ -85,7 +98,7 @@ class Router:
         self.url_router = f'{host}:{port}'
         self._username = username
         self._password = password
-        self.request_interface = []
+        self.request_interface = {}
 
         self._mac = ""
         self._serial_number = ""
@@ -130,9 +143,11 @@ class Router:
         self._hw_type = data_show_system_mode["active"]
 
         data_show_rc_interface_ip_global = await self.show_rc_interface_ip_global()
-        for row in data_show_rc_interface_ip_global:
-            self.request_interface.append(row)
-
+        data_show_interface = await self.show_interface()
+        for interface, data_interface in data_show_interface.items():
+            if interface in data_show_rc_interface_ip_global or data_interface.get('type', 'NO') in LIST_INTERFACES:
+                self.request_interface[interface] = f"{data_interface['type']} {data_interface.get('description', '')}"
+        _LOGGER.debug(f'{self._mac} request_interface - {self.request_interface}')
         return True
 
 
@@ -227,24 +242,28 @@ class Router:
     async def show_rc_interface(self):
         interfaces = await self.api("get", "/rci/show/rc/interface")
         interface_wifi = {}
-        for interface in interfaces:
-            interf = interfaces[interface]
-            if (interf.get("authentication", False) 
+        for interface, interf in interfaces.items():
+            if (
+                interf.get("authentication", False) 
                 and interf.get("authentication").get("wpa-psk", False)
-                and interf.get("authentication").get("wpa-psk").get("psk", False)):
+                and interf.get("authentication").get("wpa-psk").get("psk", False)
+                ):
                 psw = interf["authentication"]["wpa-psk"]["psk"]
             else:
                 psw = None
-            nm_inerface = f"{INTERFACES_WIFI_NAME.get(interface.split('/')[0], interface)} {interf.get('ssid', '')}"
+            if not interf.get('ssid', False):
+                nm_inerface = interface
+            else:
+                nm_inerface = (f"{INTERFACES_WIFI_NAME.get(interface.split('/')[0], interface)}" % interf.get('ssid', "nameless"))
             interface_wifi[interface] = DataRcInterface(
-                interface,
-                nm_inerface,
-                interface.split('/')[0],
-                interf.get("ssid", False),
-                psw,
-                interf.get("up", False),
-                interf.get("rename", None),
-                interf.get("description", None),
+                                                        interface,
+                                                        nm_inerface,
+                                                        interface.split('/')[0],
+                                                        interf.get("ssid", False),
+                                                        psw,
+                                                        interf.get("up", False),
+                                                        interf.get("rename", None),
+                                                        interf.get("description", None),
             )
         return interface_wifi
 
