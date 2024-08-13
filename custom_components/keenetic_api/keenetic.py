@@ -142,11 +142,12 @@ class Router:
         data_show_system_mode = await self.show_system_mode()
         self._hw_type = data_show_system_mode["active"]
 
-        data_show_rc_interface_ip_global = await self.show_rc_interface_ip_global()
-        data_show_interface = await self.show_interface()
-        for interface, data_interface in data_show_interface.items():
-            if interface in data_show_rc_interface_ip_global or data_interface.get('type', 'NO') in LIST_INTERFACES:
-                self.request_interface[interface] = f"{data_interface['type']} {data_interface.get('description', '')}"
+        if self._hw_type == "router":
+            data_show_rc_interface_ip_global = await self.show_rc_interface_ip_global()
+            data_show_interface = await self.show_interface()
+            for interface, data_interface in data_show_interface.items():
+                if interface in data_show_rc_interface_ip_global or data_interface.get('type', 'NO') in LIST_INTERFACES:
+                    self.request_interface[interface] = f"{data_interface['type']} {data_interface.get('description', '')}"
         _LOGGER.debug(f'{self._mac} request_interface - {self.request_interface}')
         return True
 
@@ -360,7 +361,7 @@ class Router:
         show_associations = full_info_other[2]['show']['associations']
         show_rc_system_usb = full_info_other[3]['show']['rc']['system'].get('usb', [])
         show_rc_ip_http = full_info_other[4]['show']['rc']['ip']['http']
-        show_media = full_info_other[5]['show']['media']
+        show_media = full_info_other[5]['show'].get('media', [])
 
         show_ip_hotspot = {}
         show_rc_ip_static = {}
