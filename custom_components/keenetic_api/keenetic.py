@@ -81,6 +81,8 @@ LIST_INTERFACES = [
     "Wireguard",
     "OpenVPN",
     "EoIP",
+    # "GigabitEthernet",
+    # "Ethernet",
 ]
 
 class Router:
@@ -352,7 +354,6 @@ class Router:
             data_json_send.append({"show": {"rc": {"interface": {"ip": {"global": {}}}}}})
             data_json_send.append({"show": {"rc": {"ip": {"static": {}}}}})
             data_json_send.append({"show": {"rc": {"ip": {"hotspot": {}}}}})
-            data_json_send.append({"show": {"rc": {"ip": {"http": {}}}}})
 
         full_info_other = await self.api("post", "/rci/", json=data_json_send)
 
@@ -361,7 +362,7 @@ class Router:
         show_associations = full_info_other[2]['show']['associations']
         show_rc_system_usb = full_info_other[3]['show']['rc']['system'].get('usb', [])
         show_rc_ip_http = full_info_other[4]['show']['rc']['ip']['http']
-        show_media = full_info_other[5]['show'].get('media', [])
+        show_media = full_info_other[5]['show'].get('media', {})
 
         show_ip_hotspot = {}
         show_rc_ip_static = {}
