@@ -220,7 +220,7 @@ class Router:
     async def async_backup(self, folder: str, type_fw: list = ["firmware", "config"]):
         if "firmware" in type_fw:
             await self.async_download_file(f"{self.url_router}/ci/firmware", folder)
-        elif "config" in type_fw:
+        if "config" in type_fw:
             await self.async_download_file(f"{self.url_router}/ci/startup-config", folder)
         return True
 
