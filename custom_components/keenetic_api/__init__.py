@@ -6,7 +6,6 @@ from aiohttp import CookieJar, ClientTimeout, ClientError
 from typing import Any
 from datetime import timedelta
 
-from homeassistant.helpers.update_coordinator import UpdateFailed
 from homeassistant.const import (
     CONF_HOST,
     CONF_PASSWORD,
@@ -19,17 +18,12 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.helpers import aiohttp_client, device_registry as dr
-from homeassistant.core import (
-    HomeAssistant,
-    ServiceCall,
-    ServiceResponse,
-    SupportsResponse,
-)
-from homeassistant.exceptions import HomeAssistantError, ConfigEntryNotReady
-from homeassistant.helpers.json import json_loads
+from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers import aiohttp_client
 from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers import device_registry as dr
 
+from .services import async_setup_services
 from .coordinator import (
     KeeneticRouterCoordinator, 
     KeeneticRouterFirmwareCoordinator, 
@@ -93,26 +87,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         COORD_RC_INTERFACE: coordinator_rc_interface
     }
 
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-    entry.async_on_unload(entry.add_update_listener(async_reload_entry))
-
-
-    async def request_api(service: ServiceCall):
-        data_json = service.data.get("data_json", [])
-        response = await hass.data[DOMAIN][service.data["entry_id"]][CROUTER].api(service.data["method"], service.data["endpoint"], data_json)
-        _LOGGER.debug(f'Services request_api response - {response}')
-        return {"response": response}
-    hass.services.async_register(DOMAIN, "request_api", request_api, supports_response=SupportsResponse.OPTIONAL)
-
-    async def backup_router(service: ServiceCall):
-        response = await hass.data[DOMAIN][service.data["entry_id"]][CROUTER].async_backup(service.data["folder"], service.data["type"])
-        return True
-    hass.services.async_register(DOMAIN, "backup_router", backup_router)
+    await async_setup_services(hass)
 
     try:
         remove_entities_or_devices(hass, entry)
     except Exception as err:
         _LOGGER.error(f'remove_entities_or_devices - {err}')
+
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
     return True
 
