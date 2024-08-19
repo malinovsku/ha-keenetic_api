@@ -1,7 +1,11 @@
 request_api:
   fields:
+    device_id:
+      selector:
+        device:
+          integration: keenetic_api
+          manufacturer: Keenetic
     entry_id:
-      required: true
       selector:
         config_entry:
           integration: keenetic_api
@@ -23,6 +27,11 @@ request_api:
         template:
 backup_router:
   fields:
+    device_id:
+      selector:
+        device:
+          integration: keenetic_api
+          manufacturer: Keenetic
     entry_id:
       required: true
       selector:

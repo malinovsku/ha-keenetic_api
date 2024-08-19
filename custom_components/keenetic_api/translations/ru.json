@@ -45,6 +45,9 @@
     "request_api": {
       "name": "Выполнить запрос.",
       "fields": {
+        "device_id": {
+          "name": "Устройство:"
+        },
         "entry_id": {
           "name": "Интеграция:"
         },

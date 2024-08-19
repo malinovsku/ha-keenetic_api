@@ -47,6 +47,9 @@
       "request_api": {
         "name": "Execute request.",
         "fields": {
+          "device_id": {
+            "name": "Device:"
+          },
           "entry_id": {
             "name": "Integration:"
           },

@@ -16,11 +16,11 @@ jobs:
       - name: "Checkout the repository"
         uses: "actions/checkout@v3.5.3"
 
-      - name: "Adjust version number"
-        shell: "bash"
-        run: |
-          yq -i -o json '.version="${{ github.event.release.tag_name }}"' \
-            "${{ github.workspace }}/custom_components/keenetic_api/manifest.json"
+      # - name: "Adjust version number"
+      #   shell: "bash"
+      #   run: |
+      #     yq -i -o json '.version="${{ github.event.release.tag_name }}"' \
+      #       "${{ github.workspace }}/custom_components/keenetic_api/manifest.json"
 
       - name: "ZIP the integration directory"
         shell: "bash"
