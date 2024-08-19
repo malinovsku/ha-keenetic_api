@@ -23,7 +23,7 @@ from homeassistant.helpers import aiohttp_client
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers import device_registry as dr
 
-from .services import async_setup_services
+from .services import async_setup_services, async_unload_services
 from .coordinator import (
     KeeneticRouterCoordinator, 
     KeeneticRouterFirmwareCoordinator, 
@@ -106,8 +106,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator_full = hass.data[DOMAIN][entry.entry_id][COORD_FULL]
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)
-    hass.services.async_remove(DOMAIN, "request_api")
-    hass.services.async_remove(DOMAIN, "backup_router")
+        async_unload_services(hass)
     return unload_ok
 
 

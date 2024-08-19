@@ -5,6 +5,7 @@ from homeassistant.core import (
     ServiceCall,
     ServiceResponse,
     SupportsResponse,
+    callback,
 )
 
 from .const import (
@@ -27,3 +28,9 @@ async def async_setup_services(hass: HomeAssistant) -> None:
         response = await hass.data[DOMAIN][service.data["entry_id"]][CROUTER].async_backup(service.data["folder"], service.data["type"])
         return True
     hass.services.async_register(DOMAIN, "backup_router", backup_router)
+
+
+@callback
+def async_unload_services(hass: HomeAssistant) -> None:
+    hass.services.async_remove(DOMAIN, "request_api")
+    hass.services.async_remove(DOMAIN, "backup_router")
