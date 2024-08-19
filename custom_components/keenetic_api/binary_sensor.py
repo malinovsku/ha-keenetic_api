@@ -56,8 +56,6 @@ BINARY_SENSOR_TYPES: dict[str, KeeneticBinarySensorEntityDescription] = {
 }
 
 
-
-
 async def async_setup_entry(
     hass: HomeAssistant, 
     entry: ConfigEntry, 
