@@ -3,8 +3,6 @@ name: "Release"
 on:
   release:
     types: 
-      - edited
-      - prereleased
       - published
 
 permissions: {}
