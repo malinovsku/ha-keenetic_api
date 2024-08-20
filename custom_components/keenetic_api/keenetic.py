@@ -145,10 +145,16 @@ class Router:
         self._hw_type = data_show_system_mode["active"]
 
         if self._hw_type == "router":
-            data_show_rc_interface_ip_global = await self.show_rc_interface_ip_global()
+            # data_show_rc_interface_ip_global = await self.show_rc_interface_ip_global()
             data_show_interface = await self.show_interface()
             for interface, data_interface in data_show_interface.items():
-                if interface in data_show_rc_interface_ip_global or (data_interface.get('type', 'NO') in LIST_INTERFACES and data_interface.get('global', False)):
+                if (
+                    (
+                        data_interface.get('type', 'No') in LIST_INTERFACES
+                        and data_interface.get('security-level', False) == 'public'
+                    )
+                    or data_interface.get('global', False)
+                    ):
                     self.request_interface[interface] = f"{data_interface['type']} {data_interface.get('description', '')}"
         _LOGGER.debug(f'{self._mac} request_interface - {self.request_interface}')
         return True

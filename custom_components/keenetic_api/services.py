@@ -16,6 +16,11 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
+SERVICES_TYPE = [
+    "request_api",
+    "backup_router",
+]
+
 async def async_setup_services(hass: HomeAssistant) -> None:
 
     @callback
@@ -49,13 +54,12 @@ async def async_setup_services(hass: HomeAssistant) -> None:
         return True
 
 
-
-    hass.services.async_register(DOMAIN, "request_api", request_api, supports_response=SupportsResponse.OPTIONAL)
-    hass.services.async_register(DOMAIN, "backup_router", backup_router)
+    for service in SERVICES_TYPE:
+        hass.services.async_register(DOMAIN, service, service, supports_response=SupportsResponse.OPTIONAL)
 
 
 
 @callback
 def async_unload_services(hass: HomeAssistant) -> None:
-    hass.services.async_remove(DOMAIN, "request_api")
-    hass.services.async_remove(DOMAIN, "backup_router")
+    for service in SERVICES_TYPE:
+        hass.services.async_remove(DOMAIN, service)

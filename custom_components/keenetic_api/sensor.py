@@ -55,7 +55,7 @@ def convert_uptime(uptime: int) -> datetime:
     else:
         return None
 
-def convert_data_size(data_size: int) -> float:
+def convert_data_size(data_size: int = 0) -> float:
     """Convert data_size."""
     return round(data_size/1024/1024, 3)
 
