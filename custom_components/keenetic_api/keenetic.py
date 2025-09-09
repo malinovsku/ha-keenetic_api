@@ -81,6 +81,10 @@ LIST_INTERFACES = [
     "Wireguard",
     "OpenVPN",
     "EoIP",
+    "TunnelSixInFour",
+    "WifiStation",
+]
+LIST_INTERFACES_PUBLIC = [
     "GigabitEthernet",
     "Ethernet",
 ]
@@ -158,6 +162,10 @@ class Router:
                 if (
                     (
                         data_interface.get('type', 'No') in LIST_INTERFACES
+                    )
+                    or #проверяем разные интерфейсы по разным спискам что бы исключить лишнее или системное (найти решение для точного списка)
+                    (
+                        data_interface.get('type', 'No') in LIST_INTERFACES_PUBLIC
                         and data_interface.get('security-level', False) == 'public'
                     )
                     or data_interface.get('global', False)
