@@ -82,7 +82,7 @@ LIST_INTERFACES = [
     "OpenVPN",
     "EoIP",
     "TunnelSixInFour",
-    "WifiStation",
+    # "WifiStation",
 ]
 LIST_INTERFACES_PUBLIC = [
     "GigabitEthernet",
