@@ -10,8 +10,8 @@
           "port": "Порт",
           "username": "Логин",
           "password": "Пароль",
-          "ssl": "SSL certificate",
-          "scan_interval": "Интервал скарирования (секунд)."
+          "ssl": "SSL сертификат",
+          "scan_interval": "Интервал сканирования (секунд)."
         },
         "description": "Введите свои учетные данные Keenetic."
       }
@@ -25,18 +25,20 @@
       "configure_router": {
         "description": "Дополнительные настройки.",
         "data": {
-          "scan_interval": "Интервал скарирования (секунд).",
-          "create_image_qr": "Создать объекты Image QG WiFi.",
+          "scan_interval": "Интервал сканирования (секунд).",
+          "create_image_qr": "Создать объекты Image QR WiFi.",
           "create_entity_all_cliens_button_policy": "Создать объекты Select политик для всех устройств.",
           "cliens_select_policy": "Создать объекты Select политик по выбранным:",
           "create_device_tracker": "Создать объекты device_tracker по всем устройствам.",
-          "create_entity_port_forwarding": "Создать объекты Switch по всем port forwarding."
+          "create_select_device_tracker": "Создать объекты device_tracker по выбранным устройствам.",
+          "create_entity_port_forwarding": "Создать объекты Switch по всем port forwarding.",
+          "backup_type_file": "Файлы резервной копии для скачивания при обновлении."
         }
       },
       "configure_other": {
         "description": "Дополнительные настройки.",
         "data": {
-          "scan_interval": "Интервал скарирования (секунд)."
+          "scan_interval": "Интервал сканирования (секунд)."
         }
       }
     }
@@ -102,10 +104,10 @@
         "name": "Загрузка процессора"
       },
       "memory": {
-        "name": "Использовано памяти"
+        "name": "Использование памяти"
       },
       "uptime": {
-        "name": "Время запуска"
+        "name": "Время работы"
       },
       "temperature_2_4g": {
         "name": "Температура 2.4g чипа"
@@ -114,10 +116,10 @@
         "name": "Температура 5g чипа"
       },
       "clients_wifi": {
-        "name": "Клиентов WiFi"
+        "name": "Клиенты WiFi"
       },
       "wan_ip_adress": {
-        "name": "Внешний IP адрес"
+        "name": "Внешний IP-адрес"
       },
       "rxbytes": {
         "name": "{name} Загружено"
@@ -126,7 +128,7 @@
         "name": "{name} Выгружено"
       },
       "timestamp": {
-        "name": "{name} Время запуска"
+        "name": "{name} Время работы"
       },
       "rxspeed": {
         "name": "{name} Входящая скорость"
@@ -167,16 +169,16 @@
         "name": "PortFrw {pfrw_name}"
       },
       "web_configurator_access": {
-        "name": "Доступ к Web Интерфейсу"
+        "name": "Доступ к веб-интерфейсу"
       },
       "power_usb": {
         "name": "Питание USB порта {number}"
       }
     },
-      "number": {
-        "clients_idle_timeout_wifi": {
-          "name": "Таймаут клиентов {name_interface}"
-        }
+    "number": {
+      "clients_idle_timeout_wifi": {
+        "name": "Таймаут клиентов {name_interface}"
       }
+    }
   }
 }
