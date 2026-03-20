@@ -1,184 +1,184 @@
 {
-    "config": {
-      "abort": {
-        "already_configured": "Устройство уже настроено!"
-      },
-      "step": {
-        "user": {
-          "data": {
-            "host": "Хост",
-            "port": "Порт",
-            "username": "Логин",
-            "password": "Пароль",
-            "ssl": "SSL certificate",
-            "scan_interval": "Интервал скарирования (секунд)."
-          },
-          "description": "Введите свои учетные данные Keenetic."
-        }
-      }
+  "config": {
+    "abort": {
+      "already_configured": "Device is already configured!"
     },
-    "options": {
-      "abort": {
-        "not_supported_settings": "Дополнительные настройки доступны \n только для типа router! \n У вас {hw_type}"
-      },
-      "step": {
-        "configure_router": {
-          "description": "Дополнительные настройки.",
-          "data": {
-            "scan_interval": "Интервал скарирования (секунд).",
-            "create_image_qr": "Создать Image QG WiFi.",
-            "create_entity_all_cliens_button_policy": "Создать Select политик для всех устройств.",
-            "cliens_select_policy": "Создать Select политик по выбранным устройствам.",
-            "create_device_tracker": "Создать Device tracker по всем устройствам.",
-            "create_select_device_tracker": "Создать Device tracker по выбранным устройствам.",
-            "create_entity_port_forwarding": "Создать Switch по всем port forwarding.",
-            "backup_type_file": "Файлы бекапа для скачивания при обновлении."
-          }
+    "step": {
+      "user": {
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "username": "Username",
+          "password": "Password",
+          "ssl": "SSL certificate",
+          "scan_interval": "Scan interval (seconds)."
         },
-        "configure_other": {
-          "description": "Дополнительные настройки.",
-          "data": {
-            "scan_interval": "Интервал скарирования (секунд)."
-          }
-        }
+        "description": "Enter your Keenetic credentials."
       }
+    }
+  },
+  "options": {
+    "abort": {
+      "not_supported_settings": "Additional settings are available \n only for router type! \n Your type is {hw_type}"
     },
-    "services": {
-      "request_api": {
-        "name": "Execute request.",
-        "description": "Execute request.",
-        "fields": {
-          "device_id": {
-            "name": "Device:",
-            "description": "Device."
-          },
-          "entry_id": {
-            "name": "Integration:",
-            "description": "Integration."
-          },
-          "method": {
-            "name": "Method:",
-            "description": "Method."
-          },
-          "endpoint": {
-            "name": "Point API:",
-            "description": "Point API."
-          },
-          "data_json": {
-            "name": "Data:",
-            "description": "Data."
-          }
+    "step": {
+      "configure_router": {
+        "description": "Additional settings.",
+        "data": {
+          "scan_interval": "Scan interval (seconds).",
+          "create_image_qr": "Create QR WiFi Image entities.",
+          "create_entity_all_cliens_button_policy": "Create policy Select entities for all devices.",
+          "cliens_select_policy": "Create policy Select entities for selected devices.",
+          "create_device_tracker": "Create Device tracker for all devices.",
+          "create_select_device_tracker": "Create Device tracker for selected devices.",
+          "create_entity_port_forwarding": "Create Switch for all port forwarding.",
+          "backup_type_file": "Backup files to download on update."
         }
       },
-      "backup_router": {
-        "name": "Create backup.",
-        "description": "Create backup.",
-        "fields": {
-          "entry_id": {
-            "name": "Integration:",
-            "description": "Integration."
-          },
-          "folder": {
-            "name": "The folder to save:",
-            "description": "The folder to save."
-          },
-          "type": {
-            "name": "Type backup:",
-            "description": "Type backup."
-          }
-        }
-      }
-    },
-    "entity": {
-      "select": {
-        "client_policy": {
-          "name": "Client Policy",
-          "state": {
-            "default": "Default",
-            "not_internet": "Not internet"
-          }
-        }
-      },
-      "sensor": {
-        "cpuload": {
-          "name": "CPU load"
-        },
-        "memory": {
-          "name": "Memory used"
-        },
-        "uptime": {
-          "name": "Start up time"
-        },
-        "temperature_2_4g": {
-          "name": "Temperature 2.4g chip"
-        },
-        "temperature_5g": {
-          "name": "Temperature 5g chip"
-        },
-        "clients_wifi": {
-          "name": "Clients WiFi"
-        },
-        "wan_ip_adress": {
-          "name": "WAN IP adress"
-        },
-        "rxbytes": {
-          "name": "{name} Downloaded"
-        },
-        "txbytes": {
-          "name": "{name} Uploaded"
-        },
-        "timestamp": {
-          "name": "{name} Start up time"
-        },
-        "rxspeed": {
-          "name": "{name} Downlink speed"
-        },
-        "txspeed": {
-          "name": "{name} Uplink speed"
-        }
-      },
-      "image": {
-        "qrwifi": {
-          "name": "{name}"
-        }
-      },
-      "button": {
-        "reboot": {
-          "name": "Reboot"
-        }
-      },
-      "binary_sensor": {
-        "connected_to_router": {
-          "name": "Connection to Keenetic {name}"
-        },
-        "connected_to_interface": {
-          "name": "{name} Connection"
-        },
-        "connected_to_media": {
-          "name": "Status {name}"
-        },
-        "interface_pingcheck": {
-          "name": "{name} PingCheck"
-        }
-      },
-      "switch": {
-        "interface": {
-          "name": "{name_interface}"
-        },
-        "port_forwarding": {
-          "name": "PortFrw {pfrw_name}"
-        },
-        "web_configurator_access": {
-          "name": "Web Configurator Access"
-        },
-        "power_usb": {
-          "name": "USB power port {number}"
-        }
-      },
-      "number": {
-        "clients_idle_timeout_wifi": {
-          "name": "Clients Idle Timeout {name_interface}"
+      "configure_other": {
+        "description": "Additional settings.",
+        "data": {
+          "scan_interval": "Scan interval (seconds)."
         }
       }
     }
+  },
+  "services": {
+    "request_api": {
+      "name": "Execute request.",
+      "description": "Execute request.",
+      "fields": {
+        "device_id": {
+          "name": "Device:",
+          "description": "Device."
+        },
+        "entry_id": {
+          "name": "Integration:",
+          "description": "Integration."
+        },
+        "method": {
+          "name": "Method:",
+          "description": "Method."
+        },
+        "endpoint": {
+          "name": "API endpoint:",
+          "description": "API endpoint."
+        },
+        "data_json": {
+          "name": "Data:",
+          "description": "Data."
+        }
+      }
+    },
+    "backup_router": {
+      "name": "Create backup.",
+      "description": "Create backup.",
+      "fields": {
+        "entry_id": {
+          "name": "Integration:",
+          "description": "Integration."
+        },
+        "folder": {
+          "name": "Save folder:",
+          "description": "Save folder."
+        },
+        "type": {
+          "name": "Backup type:",
+          "description": "Backup type."
+        }
+      }
+    }
+  },
+  "entity": {
+    "select": {
+      "client_policy": {
+        "name": "Access policy",
+        "state": {
+          "default": "Default",
+          "not_internet": "No internet"
+        }
+      }
+    },
+    "sensor": {
+      "cpuload": {
+        "name": "CPU load"
+      },
+      "memory": {
+        "name": "Memory used"
+      },
+      "uptime": {
+        "name": "Uptime"
+      },
+      "temperature_2_4g": {
+        "name": "2.4G chip temperature"
+      },
+      "temperature_5g": {
+        "name": "5G chip temperature"
+      },
+      "clients_wifi": {
+        "name": "WiFi clients"
+      },
+      "wan_ip_adress": {
+        "name": "WAN IP address"
+      },
+      "rxbytes": {
+        "name": "{name} Downloaded"
+      },
+      "txbytes": {
+        "name": "{name} Uploaded"
+      },
+      "timestamp": {
+        "name": "{name} Uptime"
+      },
+      "rxspeed": {
+        "name": "{name} Downlink speed"
+      },
+      "txspeed": {
+        "name": "{name} Uplink speed"
+      }
+    },
+    "image": {
+      "qrwifi": {
+        "name": "{name}"
+      }
+    },
+    "button": {
+      "reboot": {
+        "name": "Reboot"
+      }
+    },
+    "binary_sensor": {
+      "connected_to_router": {
+        "name": "Connection to Keenetic {name}"
+      },
+      "connected_to_interface": {
+        "name": "{name} Connection"
+      },
+      "connected_to_media": {
+        "name": "{name} Status"
+      },
+      "interface_pingcheck": {
+        "name": "{name} PingCheck"
+      }
+    },
+    "switch": {
+      "interface": {
+        "name": "{name_interface}"
+      },
+      "port_forwarding": {
+        "name": "PortFrw {pfrw_name}"
+      },
+      "web_configurator_access": {
+        "name": "Web configurator access"
+      },
+      "power_usb": {
+        "name": "USB port {number} power"
+      }
+    },
+    "number": {
+      "clients_idle_timeout_wifi": {
+        "name": "Clients idle timeout {name_interface}"
+      }
+    }
+  }
 }
